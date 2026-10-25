@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Номерной магнат</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-tap-highlight-color:transparent}
+:root {
+  --bg: #121212; --panel: #1e1e1e; --text: #f0f0f0; --text-sec: #888;
+  --border: #333; --shadow: rgba(0,0,0,0.5); --btn: #2a2a2a; --btn-text: #fff;
+  --accent: #ff8c00; --grad: linear-gradient(135deg, #ff8c00, #ff3c3c);
+}
+body.light {
+  --bg: #f0f2f5; --panel: #ffffff; --text: #1a1a1a; --text-sec: #666;
+  --border: #ddd; --shadow: rgba(0,0,0,0.1); --btn: #e0e0e0; --btn-text: #1a1a1a;
+}
+/* Темы за деньги */
+body.theme-gold { --bg: #1a1500; --panel: #2a2000; --text: #ffd700; --text-sec: #b08d00; --border: #4a3a00; --accent: #ffb300; --grad: linear-gradient(135deg, #ffd700, #b8860b); }
+body.theme-pink { --bg: #1a0b12; --panel: #2d1420; --text: #ffb6c1; --text-sec: #c47a8a; --border: #4a2035; --accent: #ff69b4; --grad: linear-gradient(135deg, #ff69b4, #c71585); }
+body.theme-blue { --bg: #0b131a; --panel: #14222d; --text: #87ceeb; --text-sec: #5c8a9e; --border: #203e4a; --accent: #00bfff; --grad: linear-gradient(135deg, #00bfff, #1e90ff); }
+
+/* Планшетный режим */
+body.tablet-mode { font-size: 18px; }
+body.tablet-mode .apps { grid-template-columns: repeat(5, 1fr); }
+body.tablet-mode .bottom .btn { font-size: 16px; }
+body.tablet-mode #plate { width: min(60vw, 700px); }
+
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Roboto,Arial,sans-serif;overflow:hidden;height:100vh;transition:background 0.3s,color 0.3s}
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.screen{position:fixed;inset:0;display:none;flex-direction:column;overflow-y:auto;padding-bottom:90px;background:transparent;z-index:1}
+.screen.active{display:flex}
+
+/* Кнопки */
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 20px;border-radius:12px;font-size:16px;font-weight:700;border:none;background:var(--btn);color:var(--btn-text);box-shadow:0 4px 10px var(--shadow);cursor:pointer;font-family:inherit;min-height:46px;transition:transform 0.1s, filter 0.2s}
+.btn:active{transform:scale(0.96)}
+.btn.y{background:var(--accent);color:#fff;box-shadow:0 4px 15px rgba(255,140,0,0.3)}
+.btn.g{background:#2e7d32;color:#fff;box-shadow:0 4px 15px rgba(46,125,50,0.3)}
+.btn.r{background:#c62828;color:#fff;box-shadow:0 4px 15px rgba(198,40,40,0.3)}
+.btn.d{background:var(--panel);color:var(--text);box-shadow:inset 0 0 0 1px var(--border)}
+.btn:disabled{opacity:.4;transform:none}
+
+/* Главный экран (Новый UI) */
+.top{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:16px;gap:10px;z-index:10}
+.left-top{display:flex;align-items:center;gap:10px;}
+.settings-btn{width:44px;height:44px;border-radius:50%;background:var(--panel);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:inset 0 0 0 1px var(--border);cursor:pointer;color:var(--text)}
+.guar{font-size:12px;color:var(--text-sec);}
+.gbar{height:8px;width:100px;background:var(--panel);border-radius:4px;overflow:hidden;margin-top:4px;box-shadow:inset 0 0 0 1px var(--border)}
+.gfill{height:100%;background:var(--grad);transition:width .3s}
+.bal{background:var(--panel);border-radius:12px;padding:8px 16px;font-size:18px;font-weight:800;box-shadow:inset 0 0 0 1px var(--border);color:var(--text);display:flex;align-items:center;gap:8px}
+
+/* Центрирование номера */
+.main-center-content{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;width:100%;gap:20px;padding-top:60px;}
+#plate{width:min(92vw,500px);aspect-ratio:800/180;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:"Arial Black",sans-serif;font-weight:900;color:#1a1a1a;font-size:clamp(45px,15vw,100px);letter-spacing:2px;transition:transform 0.2s;overflow:hidden;position:relative;box-sizing:border-box;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+#spin{width:min(92vw,360px);height:70px;font-size:24px;border-radius:16px;text-transform:uppercase;letter-spacing:1px}
+.cost{font-size:14px;color:var(--text-sec);text-align:center;min-height:20px}
+
+/* Нижнее меню (4 кнопки) */
+.bottom{display:flex;gap:6px;padding:12px 10px;position:fixed;bottom:0;left:0;right:0;background:linear-gradient(transparent,var(--bg) 40%);z-index:5}
+.bottom .btn{flex:1;height:65px;font-size:11px;padding:4px;flex-direction:column;gap:2px}
+.bottom .btn .icon{font-size:22px}
+
+/* Общие элементы списков */
+.hdr{display:flex;justify-content:space-between;align-items:center;padding:16px;gap:10px;position:sticky;top:0;background:var(--bg);z-index:10; box-shadow:0 4px 10px rgba(0,0,0,0.3)}
+.hdr h1{font-size:22px;font-weight:800;color:var(--text)}
+.body{padding:16px}
+.card{background:var(--panel);border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:inset 0 0 0 1px var(--border), 0 4px 15px var(--shadow);display:flex;flex-direction:column;gap:10px;color:var(--text)}
+.card .t{font-size:16px;font-weight:800}
+.card .s{font-size:13px;color:var(--text-sec);white-space:pre-line;line-height:1.4}
+.card .p{color:var(--accent);font-weight:800;font-size:18px}
+.card .a{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.card .a .btn{flex:1}
+.footer{position:fixed;bottom:0;left:0;right:0;padding:12px 16px;display:flex;gap:8px;background:linear-gradient(transparent,var(--bg) 40%);z-index:5}
+
+/* Вкладки (фикс автосалона) */
+.tabs-container{display:flex;gap:6px;overflow-x:auto;padding-bottom:12px;position:sticky;top:65px;background:var(--bg);z-index:9; padding-top:8px;}
+.tab-btn{flex:1; font-size:13px; padding:8px 12px; white-space:nowrap; border-radius:12px; border:none; font-weight:700; background:var(--panel); color:var(--text); box-shadow:inset 0 0 0 1px var(--border);}
+.tab-btn.active{background:var(--accent); color:#fff; box-shadow:0 4px 15px rgba(255,140,0,0.3);}
+
+/* Сетка приложений */
+.apps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding-bottom:20px}
+.app{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;border-radius:16px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--border);cursor:pointer;transition:transform 0.1s}
+.app:active{transform:scale(0.95)}
+.app .i{font-size:32px}
+.app .n{font-size:12px;font-weight:700;text-align:center}
+
+/* Кейсы */
+.cases{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.case{background:var(--panel);border-radius:16px;padding:16px;text-align:center;box-shadow:inset 0 0 0 2px var(--border);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;overflow:hidden}
+.case::before{content:'';position:absolute;inset:0;opacity:0.1;z-index:0}
+.case.c-bronze::before{background:#cd7f32}.case.c-silver::before{background:#c0c0c0}
+.case.c-gold::before{background:#ffd700}
+.case .i{font-size:50px;z-index:1}.case .n{font-size:15px;font-weight:800;z-index:1}
+.case .p{color:var(--accent);font-weight:800;z-index:1}
+.case.locked{opacity:.5;pointer-events:none}
+
+/* Модалка */
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(5px);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}
+#modal.on{display:flex}
+#modal .box{background:var(--panel);border-radius:24px;padding:24px;max-width:480px;width:100%;text-align:center;box-shadow:inset 0 0 0 1px var(--border), 0 10px 40px rgba(0,0,0,0.8);max-height:85vh;overflow-y:auto;color:var(--text)}
+#modal h2{font-size:22px;margin-bottom:12px;font-weight:800}
+#modal p{font-size:14px;color:var(--text-sec);margin-bottom:20px;white-space:pre-line;line-height:1.5}
+#modal .btns{display:flex;gap:10px;flex-wrap:wrap}
+#modal .btns .btn{flex:1;min-width:110px}
+#modal input, #modal select{width:100%;padding:14px;font-size:16px;text-align:center;border-radius:12px;border:2px solid var(--border);background:var(--bg);color:var(--text);font-weight:700;margin-bottom:12px;outline:none;font-family:inherit}
+
+/* Тост */
+#toast{position:fixed;top:20px;left:50%;transform:translate(-50%, -150%);background:#2e7d32;color:#fff;padding:12px 24px;border-radius:12px;transition:transform .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);z-index:200;display:flex;align-items:center;gap:12px;box-shadow:0 10px 30px rgba(0,0,0,0.5);font-weight:700}
+#toast.on{transform:translate(-50%, 0)}
+#toast .i{font-size:20px}
+
+/* Вспышки */
+.flash-effect { position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0; animation: flashAnim 1s ease-out; }
+.flash-effect.rare { background: radial-gradient(circle, rgba(80,140,255,0.5) 0%, transparent 70%); }
+.flash-effect.epic { background: radial-gradient(circle, rgba(180,80,255,0.6) 0%, transparent 70%); }
+.flash-effect.legendary { background: radial-gradient(circle, rgba(255,200,60,0.7) 0%, transparent 80%); }
+@keyframes flashAnim { 0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: 0; } }
+
+/* 3D номерной знак */
+.plate-container { position:relative; background:#fff; border-radius:8px; border:2px solid #111; padding:4px; display:flex; box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 5px 15px rgba(0,0,0,0.4); width:min(92vw, 500px); aspect-ratio: 520/120; margin:0 auto; }
+.plate-main { flex:1; display:flex; align-items:center; justify-content:center; font-family:'Arial Black', sans-serif; font-size:clamp(40px, 12vw, 85px); letter-spacing:2px; color:#000; }
+.plate-region { width:22%; border-left:2px solid #111; display:flex; flex-direction:column; align-items:center; justify-content:center; padding-left:5px; }
+.plate-region-top { font-size:clamp(35px, 8vw, 55px); font-weight:900; line-height:1; }
+.plate-region-bottom { display:flex; align-items:center; gap:4px; font-size:clamp(14px, 3vw, 20px); font-weight:bold; margin-top:2px; }
+.plate-region-bottom img { width:clamp(12px, 3vw, 20px); }
+</style>
+</head>
+<body>
+    <!-- СТАРТОВЫЙ ЭКРАН -->
+<section id="s-start" class="screen active" style="justify-content:center; align-items:center;">
+  <h1 style="font-size:36px; margin-bottom:30px; text-align:center; font-weight:900; background:var(--grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Номерной магнат</h1>
+  <div style="display:flex; flex-direction:column; gap:16px; width:min(300px, 80vw);">
+    <button class="btn y" id="start-player" style="font-size:18px; padding:18px;">Играть</button>
+    <button class="btn d" id="start-dev" style="font-size:16px; padding:16px;">Вход для разработчиков</button>
+  </div>
+</section>
+
+<!-- ГЛАВНЫЙ ЭКРАН -->
+<section id="s-main" class="screen">
+  <div class="top">
+    <div class="left-top">
+      <div class="settings-btn" onclick="show('settings'); refSettings();">⚙️</div>
+      <div class="guar">
+        <div>До гарантии: <span id="gt">0 / 1000</span></div>
+        <div class="gbar"><div class="gfill" id="gf" style="width:0"></div></div>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <div class="bal"><span id="bm">0</span> ₽</div>
+      <div class="bal" style="color:#ffd700; border-color:#ffd700;"><span id="b-usd">0</span> $</div>
+    </div>
+  </div>
+  
+  <div class="main-center-content">
+    <div id="plate" class="plate-container">
+      <div class="plate-main" id="plate-text">А000АА</div>
+      <div class="plate-region">
+        <div class="plate-region-top" id="plate-region-text">00</div>
+        <div class="plate-region-bottom">RUS <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg" alt="RU"></div>
+      </div>
+    </div>
+    <button id="spin" class="btn y">КРУТИТЬ</button>
+    <div class="cost" id="cost">3 000 ₽</div>
+  </div>
+
+  <div class="bottom">
+    <button class="btn" data-nav="garage"><span class="icon">🚗</span>Автопарк</button>
+    <button class="btn" data-nav="phone"><span class="icon">📱</span>Центр</button>
+    <button class="btn" data-nav="inv"><span class="icon">🎒</span>Инвентарь</button>
+    <button class="btn" data-nav="shop"><span class="icon">🛒</span>Магазин</button>
+  </div>
+</section>
+
+<!-- ИНВЕНТАРЬ -->
+<section id="s-inv" class="screen">
+  <div class="hdr"><h1>Инвентарь</h1><div class="bal"><span class="bv">0</span> ₽</div></div>
+  <div style="padding:0 16px;">
+    <div class="tabs-container">
+      <button class="tab-btn active" id="inv-tab-nums" onclick="switchInvTab('nums')">Номера</button>
+      <button class="tab-btn" id="inv-tab-bags" onclick="switchInvTab('bags')">Сумки</button>
+      <button class="tab-btn" id="inv-tab-frames" onclick="switchInvTab('frames')">Рамки</button>
+    </div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap;" id="inv-filters">
+      <button class="btn y" style="font-size:12px; padding:6px 10px;" data-filter="all">Все</button>
+      <button class="btn d" style="font-size:12px; padding:6px 10px;" data-filter="common">Обычные</button>
+      <button class="btn d" style="font-size:12px; padding:6px 10px;" data-filter="rare">Редкие</button>
+      <button class="btn d" style="font-size:12px; padding:6px 10px;" data-filter="epic">Эпики</button>
+      <button class="btn d" style="font-size:12px; padding:6px 10px;" data-filter="legendary">Легенды</button>
+      <button class="btn d" style="font-size:12px; padding:6px 10px; margin-left:auto;" id="btn-fav-filter">⭐ Избранные</button>
+    </div>
+  </div>
+  <div class="body" id="inv-list"></div>
+  <div class="footer"><button class="btn" data-nav="main">Назад</button><button class="btn y" id="sell-all">Продать все</button></div>
+</section>
+
+<!-- АВТОПАРК -->
+<section id="s-garage" class="screen">
+  <div class="hdr"><h1>Автопарк</h1><div class="bal"><span class="bv">0</span> ₽</div></div>
+  <div class="body" id="garage-list"></div>
+  <div class="footer"><button class="btn" data-nav="main">Назад</button><button class="btn y" onclick="show('deal'); refDeal();">Купить Т/С</button><button class="btn y" onclick="buyParking()">Купить парковку</button></div>
+</section>
+
+<!-- АВТОСАЛОН -->
+<section id="s-deal" class="screen">
+  <div class="hdr"><h1>Автосалон</h1><div class="bal"><span class="bv">0</span> ₽</div></div>
+  <div style="padding:0 16px;">
+    <div class="tabs-container">
+      <button class="tab-btn active" onclick="switchDealTab('low')" id="tab-low">Низкий</button>
+      <button class="tab-btn" onclick="switchDealTab('mid')" id="tab-mid">Средний</button>
+      <button class="tab-btn" onclick="switchDealTab('high')" id="tab-high">Высокий</button>
+      <button class="tab-btn" onclick="switchDealTab('cargo')" id="tab-cargo">Грузовой</button>
+    </div>
+  </div>
+  <div class="body" id="deal-list"></div>
+  <div class="footer"><button class="btn" data-nav="garage">Назад</button></div>
+</section>
+
+<!-- ЦЕНТР -->
+<section id="s-phone" class="screen">
+  <div class="hdr"><h1>Центр</h1></div>
+  <div style="padding:0 16px;">
+    <div class="tabs-container">
+      <button class="tab-btn active" onclick="setCenterTab('game')" id="ctab-game">Игра</button>
+      <button class="tab-btn" onclick="setCenterTab('econ')" id="ctab-econ">Экономика</button>
+      <button class="tab-btn" onclick="setCenterTab('profile')" id="ctab-profile">Профиль</button>
+    </div>
+  </div>
+  <div class="body" id="center-apps-container"></div>
+  <div class="footer"><button class="btn" data-nav="main">Назад</button></div>
+</section>
+
+<!-- МАГАЗИН -->
+<section id="s-shop" class="screen">
+  <div class="hdr"><h1>Магазин</h1><div class="bal"><span class="bv">0</span> ₽</div></div>
+  <div style="padding:0 16px;">
+    <div class="tabs-container">
+      <button class="tab-btn active" data-shoptab="boost" onclick="switchShopTab('boost')" id="stab-boost">Бусты</button>
+      <button class="tab-btn" data-shoptab="bags" onclick="switchShopTab('bags')" id="stab-bags">Сумки</button>
+      <button class="tab-btn" data-shoptab="skin" onclick="switchShopTab('skin')" id="stab-skin">Рамки</button>
+      <button class="tab-btn" data-shoptab="themes" onclick="switchShopTab('themes')" id="stab-themes">Темы</button>
+    </div>
+  </div>
+  <div class="body" id="shop-list"></div>
+  <div class="footer"><button class="btn" data-nav="main">Назад</button></div>
+</section>
+
+<!-- ЭКРАНЫ ПРИЛОЖЕНИЙ -->
+<section id="s-cases" class="screen"><div class="hdr"><h1>Кейсы</h1><div class="bal"><span class="bv">0</span> ₽</div></div><div class="body"><div class="cases" id="cases-list"></div></div><div class="footer"><button class="btn" data-nav="phone">Назад</button></div></section>
+<section id="s-ach" class="screen"><div class="hdr"><h1>Достижения</h1><div class="bal"><span class="bv">0</span> ₽</div></div><div class="body" id="ach-list"></div><div class="footer"><button class="btn" data-nav="phone">Назад</button></div></section>
+<section id="s-quests" class="screen"><div class="hdr"><h1>Задания</h1><div class="bal"><span class="bv">0</span> ₽</div></div><div class="body" id="quests-list"></div><div class="footer"><button class="btn" data-nav="phone">Назад</button></div></section>
+<section id="s-stats" class="screen"><div class="hdr"><h1>Статистика</h1><div class="bal"><span class="bv">0</span> ₽</div></div><div class="body" id="stats-list"></div><div class="footer"><button class="btn" data-nav="phone">Назад</button></div></section>
+<section id="s-profile" class="screen"><div class="hdr"><h1>Профиль</h1><div class="bal"><span class="bv">0</span> ₽</div></div><div class="body" id="profile-list"></div><div class="footer"><button class="btn" data-nav="phone">Назад</button></div></section>
+<section id="s-settings" class="screen"><div class="hdr"><h1>Настройки</h1><div class="bal"><span class="bv">0</span> ₽</div></div><div class="body" id="settings-list"></div><div class="footer"><button class="btn" data-nav="main">Назад</button></div></section>
+<section id="s-admin" class="screen"><div class="hdr"><h1 style="color:#ff3c3c">АДМИНКА</h1><div class="bal"><span class="bv">0</span> ₽</div></div><div class="body" id="admin-list"></div><div class="footer"><button class="btn" data-nav="settings">Назад</button></div></section>
+<section id="s-market" class="screen"><div class="hdr"><h1>Авторынок</h1><div class="bal"><span class="bv">0</span> ₽</div></div><div class="body" id="market-list"></div><div class="footer"><button class="btn" data-nav="phone">Назад</button></div></section>
+<section id="s-help" class="screen"><div class="hdr"><h1>Помощь</h1></div><div class="body" id="help-list"></div><div class="footer"><button class="btn" data-nav="phone">Назад</button></div></section>
+<section id="s-biz" class="screen"><div class="hdr"><h1>Бизнесы</h1><div class="bal"><span class="bv">0</span> ₽</div></div><div class="body" id="biz-list"></div><div class="footer"><button class="btn" data-nav="phone">Назад</button></div></section>
+<section id="s-cal" class="screen"><div class="hdr"><h1>Календарь</h1><div class="bal"><span class="bv">0</span> ₽</div></div><div class="body" id="cal-list"></div><div class="footer"><button class="btn" data-nav="phone">Назад</button></div></section>
+<section id="s-promo" class="screen"><div class="hdr"><h1>Промокоды</h1></div><div class="body" id="promo-list"></div><div class="footer"><button class="btn" data-nav="phone">Назад</button></div></section>
+
+<div id="modal"><div class="box"><h2 id="mt"></h2><p id="mp"></p><div id="me"></div><div class="btns" id="mb"></div></div></div>
+<div id="toast"><div class="i">🏆</div><div><div style="font-size:11px; opacity:0.8; letter-spacing:1px; text-transform:uppercase;">Достижение</div><div class="nm" id="tn" style="font-size:15px;"></div></div></div>
+<script>
+"use strict";
+const S = {
+  START: 50000, SPIN: 3000, GUAR: 1000,
+  LET: "АВЕКМНОРСТУХ", DIG: "0123456789",
+  RN: { common:"Обычный", uncommon:"Необычный", rare:"Редкий", epic:"Эпический", legendary:"Легендарный" },
+  RC: { common:"#b4b4b4", uncommon:"#50c850", rare:"#508cff", epic:"#b450ff", legendary:"#ffc83c" },
+  RMP: { common:100, uncommon:5000, rare:100000, epic:1000000, legendary:10000000 },
+  BASE: 100,
+  CB: { two_same_digits:8000, three_same_digits:21000, two_same_letters:8000, three_same_letters:24000, digits_in_row:5000, letters_palindrome:12000, digits_eq_region:13000, gov_series:50000, low_num:15000, round_num:20000 },
+  CM: { 0:1, 1:1.5, 2:3, 3:5, 4:8 },
+  RM: new Set(["77","99","177","197","199","777"]), RS: new Set(["78","98","178","198"]), RMO: new Set(["50","90","150","190","750","790"]),
+  RMU: { moscow:5, spb:4, mo:3, other:1 }, MCM: { "77":1, "99":1.05, "177":0.95, "199":0.9, "197":0.69, "777":0.57 },
+  GSM: { "ЕКХ":50, "АМР":45, "АМП":40, "ФСБ":35, "ФСО":35, "ФСК":30, "САС":25, "КОО":20, "ВОО":20, "МОО":15 },
+  GSD: 1,
+  
+  CARS: [
+    { name:"LADA 2107", price:300000, class:"low" }, { name:"LADA 21099", price:450000, class:"low" }, { name:"LADA 2114", price:550000, class:"low" }, { name:"LADA Гранта", price:700000, class:"low" },
+    { name:"Toyota Mark", price:900000, class:"low" }, { name:"VW Golf", price:1200000, class:"low" }, { name:"BMW E30", price:1800000, class:"low" },
+    { name:"KIA RIO", price:2500000, class:"mid" }, { name:"Hyundai Solaris", price:2800000, class:"mid" }, { name:"Chevrolet Lacetti", price:3200000, class:"mid" }, { name:"Ford Focus", price:3500000, class:"mid" },
+    { name:"Toyota Camry", price:5000000, class:"mid" }, { name:"Toyota Chaser", price:5500000, class:"mid" }, { name:"Audi A6", price:7000000, class:"mid" }, { name:"Mers W221", price:8000000, class:"mid" },
+    { name:"Ford Mustang", price:15000000, class:"high" }, { name:"Alfa Romeo Giulia", price:18000000, class:"high" }, { name:"Nissan GT-R", price:25000000, class:"high" }, { name:"Audi RS7", price:30000000, class:"high" },
+    { name:"Porsche 911", price:35000000, class:"high" }, { name:"Ferrari 250 GTO", price:40000000, class:"high" }, { name:"McLaren 720S", price:45000000, class:"high" }, { name:"Lamborghini Urus", price:50000000, class:"high" },
+    { name:"Bugatti Centodieci", price:60000000, class:"high" }, { name:"Rolls-Royce", price:80000000, class:"high" }, 
+    { name:"Tesla Roadster", price:150000000, class:"high" },
+    { name:"Hyundai Grand Starex", price:2000000, class:"cargo" }, { name:"Toyota Esquire", price:3000000, class:"cargo" }, { name:"Volkswagen Multivan", price:4000000, class:"cargo" }, { name:"Mercedes-Benz Sprinter", price:6000000, class:"cargo" }
+  ],
+  CASE_ONLY: [{ name:"Гнилая копейка", price:15000, class:"low" }, { name:"Bugatti Chiron", price:50000000, class:"high" }],
+
+  CASES: [
+    { n:"Бронза", p:15000, r:[{ t:"m", v:1000, c:.45 },{ t:"m", v:10000, c:.25 },{ t:"num", rarity:"rare", c:.15 },{ t:"car", name:"Гнилая копейка", c:.15 }]},
+    { n:"Серебро", p:150000, r:[{ t:"m", v:10000, c:.4 },{ t:"m", v:100000, c:.3 },{ t:"num", rarity:"rare", c:.15 },{ t:"num", rarity:"epic", c:.08 },{ t:"car", name:"LADA 2107", c:.04 },{ t:"car", name:"KIA RIO", c:.03 }]},
+    { n:"Золото", p:1500000, r:[{ t:"m", v:100000, c:.4 },{ t:"m", v:1000000, c:.25 },{ t:"num", rarity:"epic", c:.2 },{ t:"num", rarity:"legendary", c:.05 },{ t:"car", name:"BMW E30", c:.04 },{ t:"car", name:"MERS W221", c:.04 },{ t:"car", name:"Bugatti Chiron", c:.02 }]}
+  ],
+  
+  FR: {
+    default: { n:"Обычная", c:"#000000", p:0 }, gold: { n:"Золотая", c:"#ffc83c", p:500000 }, neon_green:{ n:"Неон зелёный", c:"#00ff64", p:1000000 }, neon_blue: { n:"Неон синий", c:"#0096ff", p:1000000 },
+    purple: { n:"Фиолетовая", c:"#b450ff", p:1500000 }, red: { n:"Красная", c:"#ff3c3c", p:500000 }, orange: { n:"Оранжевая", c:"#ff8c00", p:250000 }, yellow: { n:"Жёлтая", c:"#ffff00", p:250000 },
+    green: { n:"Зелёная", c:"#00ff00", p:250000 }, cyan: { n:"Голубая", c:"#00ffff", p:250000 }, blue: { n:"Синяя", c:"#0000ff", p:250000 }, pink: { n:"Розовая", c:"#ff69b4", p:250000 },
+    brown: { n:"Коричневая", c:"#8b4513", p:250000 }, gray: { n:"Серая", c:"#808080", p:250000 },
+    grad_bg: { n:"Градиент Ч-С", c:"linear-gradient(90deg, #000, #888)", p:1500000 }, grad_rb: { n:"Градиент К-С", c:"linear-gradient(90deg, #f00, #00f)", p:1500000 }, grad_pg: { n:"Градиент Ф-З", c:"linear-gradient(90deg, #b450ff, #3cc850)", p:1500000 },
+    rainbow: { n:"🌈 Радужная", c:"linear-gradient(90deg, red, orange, yellow, green, blue, purple)", p:5000000 }
+  },
+  FO: ["default","gold","neon_green","neon_blue","purple","red","orange","yellow","green","cyan","blue","pink","brown","gray","grad_bg","grad_rb","grad_pg","rainbow"],
+  
+  THEMES: [
+  { id: "theme-default", name: "Стандартная", price: 0 },
+  { id: "theme-gold", name: "Золотая", price: 10000000 },
+  { id: "theme-pink", name: "Розовая", price: 10000000 },
+  { id: "theme-blue", name: "Синяя", price: 10000000 }
+],
+  
+  ACH: [
+    { k:"first_spin", n:"Первый прокрут", d:"Прокрути номер" }, { k:"spin_100", n:"Сотка", d:"100 номеров" }, { k:"spin_1000", n:"Тысячник", d:"1000 номеров" },
+    { k:"first_rare", n:"Первый редкий", d:"Редкий номер" }, { k:"first_epic", n:"Первый эпик", d:"Эпический" }, { k:"first_leg", n:"Первый легенд", d:"Легендарный" },
+    { k:"first_sell", n:"Первая продажа", d:"Продай номер" }, { k:"first_car", n:"Первая машина", d:"Купи машину" }, { k:"first_case", n:"Первый кейс", d:"Открой кейс" },
+    { k:"bal_1m", n:"Миллион", d:"Накопи 1 000 000" }, { k:"cars_5", n:"5 машин", d:"Имей 5 машин" }, { k:"cars_10", n:"10 машин", d:"Имей 10 машин" },
+    { k:"all_salon_cars", n:"Все машины", d:"Купи весь салон" }
+  ],
+  
+  PARKINGS: {
+    single: { name: "1 место", capacity: 1, price: 500000, canopyPrice: 1000000, wallsPrice: 2000000, washPrice: 200000 },
+    three: { name: "Парковка (3 места)", capacity: 3, price: 1500000, canopyPrice: 2500000, wallsPrice: 5000000, washPrice: 500000 },
+    ten: { name: "Парковка (10 мест)", capacity: 10, price: 5000000, canopyPrice: 7000000, wallsPrice: 15000000, washPrice: 1500000 },
+    twenty: { name: "Парковка (20 мест)", capacity: 20, price: 10000000, canopyPrice: 12000000, wallsPrice: 25000000, washPrice: 2500000 }
+  },
+  
+  BIZ: [
+    { id: "auto_wash", name: "Автомойка", price: 5000000, income: 1000000 }, { id: "tire", name: "Шиномонтаж", price: 25000000, income: 5000000 },
+    { id: "salon", name: "Автосалон", price: 100000000, income: 20000000 }, { id: "factory", name: "Завод номеров", price: 500000000, income: 100000000 },
+    { id: "stock", name: "Номерная биржа", price: 2000000000, income: 400000000 }, { id: "empire", name: "Империя Магната", price: 10000000000, income: 2000000000 }
+  ],
+  
+  BAGS: [
+    { id: "bag_s", name: "Маленькая барсетка", slots: 3, price: 80000, type: "bag", currency: "rub" }, 
+    { id: "bag_m", name: "Средняя барсетка", slots: 6, price: 160000, type: "bag", currency: "rub" }, 
+    { id: "bag_l", name: "Большая барсетка", slots: 12, price: 320000, type: "bag", currency: "rub" },
+    { id: "bag_xl", name: "Огромная барсетка", slots: 35, price: 50, type: "bag", currency: "usd" },
+    { id: "back_s", name: "Маленький рюкзак", slots: 6, price: 200000, type: "backpack", currency: "rub" }, 
+    { id: "back_m", name: "Средний рюкзак", slots: 15, price: 450000, type: "backpack", currency: "rub" }, 
+    { id: "back_l", name: "Большой рюкзак", slots: 30, price: 1000000, type: "backpack", currency: "rub" },
+    { id: "back_xl", name: "Огромный рюкзак", slots: 100, price: 150, type: "backpack", currency: "usd" }
+  ],
+
+  PROMOS: {
+    "#B96IR": { type: "money", val: 100000 }, "#MAGNAT": { type: "money", val: 500000 },
+    "#LUCKY": { type: "money", val: 1000000 }, "#BOOST": { type: "boost", val: "luck" },
+    "#CLICK": { type: "boost", val: "click" }, "#START": { type: "money", val: 50000 },
+    "#FAST": { type: "money", val: 300000 }, "#MONEY": { type: "money", val: 2000000 },
+    "#CASH": { type: "money", val: 1500000 }, "#BOSS": { type: "money", val: 5000000 },
+    "#LADA": { type: "car", val: "LADA 2107" }, "#GOLF": { type: "car", val: "VW Golf" },
+    "#TOYOTA": { type: "car", val: "Toyota Camry" }, "#AUDI": { type: "car", val: "Audi A6" },
+    "#BMW": { type: "car", val: "BMW E30" }, "#MERS": { type: "car", val: "Mers W221" },
+    "#GTR": { type: "car", val: "Nissan GT-R" }, "#PORSCHE": { type: "car", val: "Porsche 911" },
+    "#SUPER": { type: "car", val: "Lamborghini Urus" }, "#BAG": { type: "bag", val: "bag_xl" },
+    "#FERRARI": { type: "car", val: "Ferrari 250 GTO" }, "#BENTLEY": { type: "money", val: 10000000 },
+    "#RICH": { type: "money", val: 15000000 }, "#KING": { type: "money", val: 25000000 },
+    "#RAZE": { type: "money", val: 100000000 }, "#TESLA": { type: "car", val: "Tesla Roadster" },
+    "#SECRET": { type: "money", val: 50000000 }, "#777": { type: "num", val: "legendary" },
+    "#GOD": { type: "god", val: 0 }, "#OMEGA": { type: "money", val: 10000000 }
+  }
+};
+
+const DAILY_QUESTS = [ { id: "spin", text: "Прокрути 50 номеров", target: 50, reward: 50000 }, { id: "sell", text: "Продай 5 номеров", target: 5, reward: 30000 }, { id: "cars", text: "Купи 1 машину", target: 1, reward: 100000 } ];
+
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const F  = n => {
+  if (n >= 999999999999) return "∞";
+  return Math.floor(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+};
+const R  = a => a[Math.floor(Math.random() * a.length)];
+const RND = () => Math.random();
+const NOW = () => Date.now();
+const SEC = 1000;
+const Sound = {
+  ctx: null, on: true, master: null,
+  init() { if (!this.ctx) { try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; } this.master = this.ctx.createGain(); this.master.gain.value = 0.35; this.master.connect(this.ctx.destination); } if (this.ctx.state === "suspended") this.ctx.resume(); },
+  tone(f, d, t = "sine", v = 0.4) { if (!this.on) return; this.init(); if (!this.ctx) return; const st = this.ctx.currentTime; const o = this.ctx.createOscillator(); const g = this.ctx.createGain(); o.type = t; o.frequency.setValueAtTime(f, st); g.gain.setValueAtTime(0, st); g.gain.linearRampToValueAtTime(v, st + 0.01); g.gain.exponentialRampToValueAtTime(0.001, st + d); o.connect(g).connect(this.master); o.start(st); o.stop(st + d + 0.02); },
+  chord(freqs, d, v = 0.2) { if (!this.on) return; this.init(); if (!this.ctx) return; freqs.forEach(f => { const st = this.ctx.currentTime; const o = this.ctx.createOscillator(); const g = this.ctx.createGain(); o.type = "sine"; o.frequency.setValueAtTime(f, st); g.gain.setValueAtTime(0, st); g.gain.linearRampToValueAtTime(v, st + 0.01); g.gain.exponentialRampToValueAtTime(0.001, st + d); o.connect(g).connect(this.master); o.start(st); o.stop(st + d + 0.02); }); },
+  click() { this.tone(800, 0.06, "triangle", 0.2); }, spin() { this.tone(150, 0.4, "sawtooth", 0.15); },
+  rare() { this.chord([523.25, 659.25, 783.99], 0.6, 0.18); }, epic() { const n = [523.25, 659.25, 783.99, 1046.5]; n.forEach((f, i) => setTimeout(() => this.chord([f, f*1.5], 0.4, 0.2), i * 90)); },
+  leg() { const n = [523.25, 659.25, 783.99, 1046.5, 1318.5, 1568]; n.forEach((f, i) => setTimeout(() => this.chord([f, f*2], 0.5, 0.22), i * 70)); },
+  buy() { this.tone(880, 0.2, "sine", 0.3); }, sell() { this.tone(1568, 0.3, "square", 0.15); }
+};
+
+const Music = {
+  ctx: null, master: null, on: true, playing: false, timer: null,
+  chords: [[220.00, 261.63, 329.63], [174.61, 220.00, 261.63], [261.63, 329.63, 392.00], [196.00, 246.94, 293.66]],
+  chordIndex: 0,
+  init() { if (!this.ctx) { try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; } this.master = this.ctx.createGain(); this.master.gain.value = (G && G.settings && typeof G.settings.music_vol === "number") ? G.settings.music_vol : 1.0; this.master.connect(this.ctx.destination); } if (this.ctx.state === "suspended") this.ctx.resume(); },
+  playChord(freqs, duration) { if (!this.ctx || !this.playing) return; const st = this.ctx.currentTime; freqs.forEach(f => { const o = this.ctx.createOscillator(); const g = this.ctx.createGain(); o.type = "sine"; o.frequency.setValueAtTime(f, st); const lfo = this.ctx.createOscillator(); const lfoGain = this.ctx.createGain(); lfo.frequency.value = 0.15; lfoGain.gain.value = 1.5; lfo.connect(lfoGain).connect(o.frequency); lfo.start(st); lfo.stop(st + duration + 0.5); g.gain.setValueAtTime(0, st); g.gain.linearRampToValueAtTime(0.12, st + 1.5); g.gain.linearRampToValueAtTime(0.12, st + duration - 1.5); g.gain.linearRampToValueAtTime(0, st + duration); o.connect(g).connect(this.master); o.start(st); o.stop(st + duration + 0.1); }); },
+  start() { if (this.playing) return; this.init(); if (!this.ctx) return; this.playing = true; this.on = true; this.chordIndex = 0; const loop = () => { if (!this.playing) return; this.playChord(this.chords[this.chordIndex], 6); this.chordIndex = (this.chordIndex + 1) % this.chords.length; this.timer = setTimeout(loop, 5500); }; loop(); },
+  stop() { this.playing = false; this.on = false; if (this.timer) { clearTimeout(this.timer); this.timer = null; } if (this.master && this.ctx) { const st = this.ctx.currentTime; this.master.gain.cancelScheduledValues(st); this.master.gain.setValueAtTime(this.master.gain.value, st); this.master.gain.linearRampToValueAtTime(0.0001, st + 0.5); setTimeout(() => { if (this.master) this.master.gain.value = (G && G.settings && typeof G.settings.music_vol === "number") ? G.settings.music_vol : 1.0; }, 600); } }
+};
+
+function def() {
+  return {
+    isDev: false, devRole: "", bal: S.START, usd: 0, num: "А000АА 00", 
+    cars: [], nums: [], level: 1, exp: 0, sl: 0, inv: 10,
+    auto: false, frames: ["default"], frame: "default", theme: "default", themes: [], 
+    boost: 0, boost_click: 0, ach: [], bags: { bag: null, backpack: null }, ownedBags: [], 
+    parkings: [], used_promos: [], lim: { "0":{c:0,r:0}, "1":{c:0,r:0}, "2":{c:0,r:0} },
+    st: { spins:0, sold:0, earn:0, cars:0, case:0, rare:0, epic:0, leg:0, common:0, uncommon:0 },
+    quests: null, nick: "Игрок", daily_bonus: { date: "", streak: 0 },
+    settings: { 
+      hide_bal: false, vibrate: true, anim_bal: true, light_theme: false, 
+      music: true, music_vol: 1.0, energy_save: false, tablet_mode: false,
+      auto_sell_common: false, auto_sell_rare: false, 
+      bought_auto_common: false, bought_auto_rare: false 
+    },
+    biz: { auto_wash: {lvl:0,last:0}, tire: {lvl:0,last:0}, salon: {lvl:0,last:0}, factory: {lvl:0,last:0}, stock: {lvl:0,last:0}, empire: {lvl:0,last:0} },
+    prestige: 0, gold_hour: 0, calendar: { day: 1, last_claim: 0 },
+    seen_numbers: [], seen_cars: [], nick_changed_once: false
+  };
+}
+
+let G = def();
+
+function save() { try { let currentId = localStorage.getItem("nm_current_account") || "default"; const accounts = JSON.parse(localStorage.getItem("nm_accounts") || "{}"); accounts[currentId] = G; localStorage.setItem("nm_accounts", JSON.stringify(accounts)); localStorage.setItem("nm_save", JSON.stringify(G)); } catch (e) {} }
+function show(n) { $$(".screen").forEach(s => s.classList.remove("active")); const s = $("#s-" + n); if (s) s.classList.add("active"); upBal(); }
+
+function parse(n) { const p = n.split(" "); if (p.length !== 2) return null; const [m, r] = p; if (m.length !== 6) return null; return { m, r, d: m.slice(1,4), l1: m[0], l2: m[4], l3: m[5] }; }
+function combos(n) { 
+  const p = parse(n); if (!p) return []; 
+  const c = [], d = p.d, l1 = p.l1, l2 = p.l2, l3 = p.l3, r = p.r; 
+  if (d[0] === d[1] && d[1] === d[2]) c.push("three_same_digits"); else if (d[0] === d[1] || d[1] === d[2] || d[0] === d[2]) c.push("two_same_digits"); 
+  if (l1 === l2 && l2 === l3) c.push("three_same_letters"); else if (l1 === l2 || l2 === l3 || l1 === l3) c.push("two_same_letters"); 
+  const a = +d[0], b = +d[1], e = +d[2]; 
+  if (b === a + 1 && e === b + 1) c.push("digits_in_row"); 
+  if (l1 === l3) c.push("letters_palindrome"); 
+  if (r === d || d === "0" + r) c.push("digits_eq_region"); 
+  const lc = l1 + l2 + l3; for (const g in S.GSM) if (lc.includes(g)) { c.push("gov_series"); break; } 
+  const numVal = parseInt(d);
+  if (numVal >= 1 && numVal <= 9) c.push("low_num");
+  if (numVal >= 100 && numVal % 100 === 0) c.push("round_num");
+  return c; 
+}
+function rar(n) { let s = 0; for (const c of combos(n)) { if (c === "gov_series") s += 5; else if (c === "three_same_digits" || c === "three_same_letters") s += 3; else if (c === "letters_palindrome" || c === "digits_in_row" || c === "digits_eq_region") s += 2; else s += 1; } if (s >= 6) return "legendary"; if (s >= 4) return "epic"; if (s >= 2) return "rare"; if (s >= 1) return "uncommon"; return "common"; }
+function rM(r) { if (S.RM.has(r)) return S.RMU.moscow; if (S.RS.has(r)) return S.RMU.spb; if (S.RMO.has(r)) return S.RMU.mo; return S.RMU.other; }
+function cM(r) { return S.MCM[r] ?? 1; }
+function cls(n) { const p = parse(n); if (!p) return 1; const lc = p.l1 + p.l2 + p.l3; for (const g in S.GSM) if (lc.includes(g)) return S.GSM[g]; return S.GSD; }
+function price(n) { const p = parse(n); if (!p) return S.BASE; const c = combos(n); let b = 0; for (const x of c) b += S.CB[x] || 0; let pr = (S.BASE + b) * S.CM[Math.min(c.length, 4)] * rM(p.r) * cM(p.r) * cls(n); pr = Math.floor(pr); return Math.max(pr, S.RMP[rar(n)] || S.BASE); }
+
+const rl = () => R(S.LET.split("")), rd = () => R(S.DIG.split(""));
+function gen() { return `${rl()}${rd()}${rd()}${rd()}${rl()}${rl()} ${rd()}${rd()}`; }
+function rReg() { const r = RND(); if (r < 0.3) return R([...S.RM]); if (r < 0.5) return R([...S.RS]); if (r < 0.65) return R([...S.RMO]); return rd() + rd(); }
+function genR(rr) { if (rr === "legendary") { const d = rd(), g = R(Object.keys(S.GSM)); return `${g[0]}${d}${d}${d}${g[1]}${g[2]} ${R([...S.RM])}`; } if (rr === "epic") { const d = rd(), l = rl(); return `${l}${d}${d}${d}${l}${l} ${rReg()}`; } if (rr === "rare") { const l = rl(); return `${l}${rd()}${rd()}${rd()}${rl()}${l} ${rReg()}`; } return gen(); }
+
+function expL(l) { if (l >= 16) return 1e9; if (l <= 10) return 100 + (l - 1) * 200; return 2400 + (l - 11) * 500; }
+function addExp(a) { if (G.level >= 16) return; G.exp += a; let lv = false; while (G.level < 16) { const n = expL(G.level); if (G.exp >= n) { G.exp -= n; G.level++; lv = true; } else break; } if (G.level >= 16) { G.level = 16; G.exp = 0; } if (lv) setTimeout(() => { showModal("НОВЫЙ УРОВЕНЬ!", `Вы достигли ${G.level} уровня!\nЗвание: ${getTitle(G.level)}`, [{ t:"ОК", cls:"y" }]); giveLevelReward(G.level); }, 200); }
+function getTitle(l) { if (l === 777) return "РАЗРАБОТЧИК"; const titles = {1:"Новичок",2:"Любитель",3:"Мастер",4:"Крутильщик",5:"Барон",6:"Автолюбитель",7:"Торговец",8:"Коллекционер",9:"Магнат",10:"Автокороль",11:"Легенда",12:"Гонщик",13:"Коллекционер",14:"Олигарх",15:"Мастер редкостей",16:"ЛЕГЕНДА"}; return titles[l] || "Новичок"; }
+function giveLevelReward(l) { if (l === 4) { const n = genR("epic"); G.nums.unshift({ n, rarity:"epic", price:price(n) }); toast("Награда: Эпический номер!"); } if (l === 6) { G.cars.push({ name:"LADA 2107", num:null, price:300000 }); toast("Награда: LADA 2107!"); } if (l === 11) { G.cars.push({ name:"TOYOTA CAMRY", num:null, price:3000000 }); toast("Награда: TOYOTA CAMRY!"); } if (l === 13) { G.cars.push({ name:"MERS W221", num:null, price:6000000 }); toast("Награда: MERS W221!"); } if (l === 15) { const n = genR("legendary"); G.nums.unshift({ n, rarity:"legendary", price:price(n) }); toast("Награда: Легендарный номер!"); } if (l === 16) { G.cars.push({ name:"Ferrari 250 GTO", num:null, price:40000000 }); toast("Награда: Ferrari 250 GTO!"); } save(); upBal(); }
+
+function showModal(t, x, btns, ex) { $("#mt").textContent = t; $("#mp").textContent = x; $("#me").innerHTML = ex || ""; const b = $("#mb"); b.innerHTML = ""; btns.forEach(bt => { const e = document.createElement("button"); e.className = "btn " + (bt.cls || ""); e.textContent = bt.t; e.onclick = () => { $("#modal").classList.remove("on"); if (bt.cb) bt.cb(); }; b.appendChild(e); }); $("#modal").classList.add("on"); }
+let toastQ = [], ts = false;
+function toast(n) { toastQ.push(n); if (!ts) pt(); }
+function pt() { if (!toastQ.length) { ts = false; return; } ts = true; const n = toastQ.shift(); $("#tn").textContent = n; $("#toast").classList.add("on"); setTimeout(() => { $("#toast").classList.remove("on"); setTimeout(pt, 400); }, 2400); }
+
+let currentAnimBal = null;
+function upBal() { 
+  if (G.settings.hide_bal) { $$(".bv").forEach(e => e.textContent = "***"); $("#bm").textContent = "***"; return; } 
+  if (!G.settings.anim_bal) { currentAnimBal = G.bal; const str = F(G.bal); $$(".bv").forEach(e => e.textContent = str); $("#bm").textContent = str; const usdEl = $("#b-usd"); if (usdEl) usdEl.textContent = G.usd || 0; return; } 
+  if (currentAnimBal === null) currentAnimBal = G.bal; 
+  const targets = $$(".bv"); const targetMain = $("#bm"); 
+  const step = () => { 
+    if (currentAnimBal < G.bal) { currentAnimBal += Math.max(1000, Math.floor((G.bal - currentAnimBal) * 0.2)); if (currentAnimBal > G.bal) currentAnimBal = G.bal; } 
+    else if (currentAnimBal > G.bal) { currentAnimBal -= Math.max(1000, Math.floor((currentAnimBal - G.bal) * 0.2)); if (currentAnimBal < G.bal) currentAnimBal = G.bal; } 
+    const str = F(currentAnimBal); targets.forEach(e => e.textContent = str); if (targetMain) targetMain.textContent = str; 
+    const usdEl = $("#b-usd"); if (usdEl) usdEl.textContent = G.usd || 0;
+    if (currentAnimBal !== G.bal) requestAnimationFrame(step); 
+  }; 
+  requestAnimationFrame(step); 
+}
+
+// НОВЫЙ DRAWPLATE (с RUS и ГОСТ-стилем)
+function drawPlate() { 
+  const mainT = $("#plate-text"); const regT = $("#plate-region-text");
+  if (!mainT || !regT) return;
+  
+  const parts = G.num.split(" ");
+  mainT.textContent = parts[0] || "А000АА";
+  regT.textContent = parts[1] || "00";
+  
+  const plate = $("#plate"); 
+  const frame = S.FR[G.frame] || S.FR.default;
+  
+  // Сброс всех стилей
+  plate.style.cssText = "";
+  plate.className = "plate-container";
+  
+  // Базовые настройки
+  plate.style.width = "min(92vw, 500px)";
+  plate.style.aspectRatio = "520/120";
+  plate.style.margin = "0 auto";
+  plate.style.borderRadius = "8px";
+  plate.style.boxSizing = "border-box";
+  plate.style.display = "flex";
+  plate.style.position = "relative";
+  plate.style.boxShadow = "0 5px 15px rgba(0,0,0,0.4)";
+
+  if (frame && frame.c) {
+    if (frame.c.includes("gradient")) {
+      // Если это ГРАДИЕНТ (включая радужную)
+      plate.style.background = frame.c;
+      plate.style.padding = "6px"; // Толщина рамки
+      
+      // Внутренний белый блок
+      const inner = document.createElement("div");
+      inner.style.cssText = "width:100%; height:100%; background:#fff; border-radius:4px; display:flex; align-items:center; padding:2px; box-sizing:border-box;";
+      
+      // Пересоздаем текст внутри
+      const newMainT = document.createElement("div");
+      newMainT.className = "plate-main"; newMainT.id = "plate-text"; newMainT.textContent = mainT.textContent;
+      
+      const newReg = document.createElement("div");
+      newReg.className = "plate-region"; newReg.id = "plate-region";
+      
+      const newRegTop = document.createElement("div");
+      newRegTop.className = "plate-region-top"; newRegTop.id = "plate-region-text"; newRegTop.textContent = regT.textContent;
+      
+      const newRegBot = document.createElement("div");
+      newRegBot.className = "plate-region-bottom";
+      newRegBot.innerHTML = 'RUS <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg" style="width:20px;">';
+
+      newReg.appendChild(newRegTop); newReg.appendChild(newRegBot);
+      inner.appendChild(newMainT); inner.appendChild(newReg);
+      
+      plate.innerHTML = "";
+      plate.appendChild(inner);
+
+    } else {
+      // Обычный цвет (сплошная рамка)
+      plate.style.background = "#fff";
+      plate.style.border = `6px solid ${frame.c}`;
+      plate.style.padding = "2px";
+      
+      // Возвращаем текст внутрь
+      plate.innerHTML = `
+        <div class="plate-main" id="plate-text">${mainT.textContent}</div>
+        <div class="plate-region" id="plate-region">
+          <div class="plate-region-top" id="plate-region-text">${regT.textContent}</div>
+          <div class="plate-region-bottom">RUS <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg" style="width:20px;"></div>
+        </div>
+      `;
+    }
+  } else {
+    // Дефолт
+    plate.style.background = "#fff";
+    plate.style.border = "6px solid #000";
+    plate.style.padding = "2px";
+    plate.innerHTML = `
+      <div class="plate-main" id="plate-text">${mainT.textContent}</div>
+      <div class="plate-region" id="plate-region">
+        <div class="plate-region-top" id="plate-region-text">${regT.textContent}</div>
+        <div class="plate-region-bottom">RUS <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg" style="width:20px;"></div>
+      </div>
+    `;
+  }
+}
+
+function getInvLimit() { let lim = G.inv; if (G.bags.bag) { const b = S.BAGS.find(x => x.id === G.bags.bag); if (b) lim += b.slots; } if (G.bags.backpack) { const b = S.BAGS.find(x => x.id === G.bags.backpack); if (b) lim += b.slots; } return lim; }
+
+function refMain() { 
+  upBal(); 
+  const c = G.sl || 0; 
+  $("#gt").textContent = `${c} / ${S.GUAR}`; 
+  const r = Math.min(c / S.GUAR, 1); 
+  $("#gf").style.width = (r * 100) + "%"; 
+  $("#gf").style.background = r >= 0.9 ? "#c83c3c" : r >= 0.7 ? "#ffc93c" : "#3cc850"; 
+  const costEl = $("#cost"); 
+  if (NOW() < G.boost_click) { const rem = Math.floor((G.boost_click - NOW()) / 1000); costEl.textContent = `6 000 ₽ · Мультиклик: ${Math.floor(rem/60)}:${String(rem%60).padStart(2,"0")}`; costEl.style.color = "#3cc850"; } 
+  else { costEl.textContent = "3 000 ₽"; costEl.style.color = "var(--text-sec)"; } 
+  drawPlate(); 
+}
+
+let lastSpin = 0;
+function spin() { 
+  if (NOW() - lastSpin < 350) return; lastSpin = NOW(); 
+  const isMulti = NOW() < G.boost_click; const cost = isMulti ? S.SPIN * 2 : S.SPIN; const limit = getInvLimit(); 
+  if (G.bal < cost) { showModal("Мало денег", `Нужно ${F(cost)} ₽.`, [{ t:"ОК", cls:"y" }]); return; } 
+  if (isMulti && G.nums.length + 2 > limit) { showModal("Инвентарь полон", "Место для 2-х номеров.", [{ t:"ОК", cls:"y" }]); return; } 
+  if (!isMulti && G.nums.length + 1 > limit) { showModal("Инвентарь полон", "Купи сумку или продай номера.", [{ t:"ОК", cls:"y" }]); return; } 
+  G.bal -= cost; upBal(); Sound.spin(); 
+  if (G.settings.vibrate && navigator.vibrate) navigator.vibrate(50); 
+  let ticks = 0; const chars = "АВЕКМНОРСТУХ0123456789"; 
+  const anim = setInterval(() => { 
+    let rndStr = ""; for (let i=0; i<6; i++) rndStr += chars[Math.floor(Math.random() * chars.length)]; 
+    const p = $("#plate-text"); if (p) p.textContent = rndStr;
+    const pr = $("#plate-region-text"); if (pr) pr.textContent = Math.floor(Math.random()*99);
+    ticks++; 
+    if (ticks > 10) { 
+      clearInterval(anim); const count = isMulti ? 2 : 1; 
+      for (let i = 0; i < count; i++) { 
+        let n; 
+        if ((G.sl || 0) >= S.GUAR - 1) { n = genR("legendary"); G.sl = 0; } 
+        else { 
+          const boost = NOW() < G.boost; 
+          if (boost) { const r = RND(); if (r < 0.0001) n = genR("legendary"); else if (r < 0.0025) n = genR("epic"); else if (r < 0.0823) n = genR("rare"); else n = gen(); } 
+          else n = gen(); 
+        } 
+        G.num = n; addNum(n); 
+      } 
+      save(); refMain(); addQuestProgress("spin", count); checkAch(); 
+    } 
+  }, 50); 
+}
+
+function addNum(n) { 
+  const rr = rar(n), p = price(n); addExp(5); 
+  G.nums.unshift({ n, rarity: rr, price: p }); G.st.spins++; 
+  if (!G.seen_numbers.includes(n)) G.seen_numbers.push(n); 
+  if (rr === "rare") G.st.rare++; else if (rr === "epic") G.st.epic++; else if (rr === "legendary") G.st.leg++; else if (rr === "uncommon") G.st.uncommon++; else G.st.common++; 
+  
+  if (rr === "legendary") { G.sl = 0; Sound.leg(); if (G.settings.vibrate && navigator.vibrate) navigator.vibrate([100,50,100]); } 
+  else { G.sl = (G.sl || 0) + 1; if (rr === "epic") { Sound.epic(); if (G.settings.vibrate && navigator.vibrate) navigator.vibrate(100); } else if (rr === "rare") Sound.rare(); } 
+  
+  if (rr === "rare" || rr === "epic" || rr === "legendary") { 
+    if (!G.settings.energy_save) {
+      const flash = document.createElement("div"); flash.className = "flash-effect " + rr; 
+      document.body.appendChild(flash); setTimeout(() => { if (flash.parentNode) flash.parentNode.removeChild(flash); }, 1000); 
+    }
+  } 
+  
+  // Автопродажа
+  if (G.settings.auto_sell_common && rr === "common") { const idx = G.nums.findIndex(x => x.n === n); if (idx !== -1) { G.nums.splice(idx, 1); G.bal += p; } }
+  if (G.settings.auto_sell_rare && (rr === "common" || rr === "uncommon" || rr === "rare")) { const idx = G.nums.findIndex(x => x.n === n); if (idx !== -1) { G.nums.splice(idx, 1); G.bal += p; } }
+}
+
+function checkQuests() { if (!G.quests || G.quests.date !== new Date().toDateString()) { G.quests = { date: new Date().toDateString(), prog: { spin: 0, sell: 0, cars: 0 }, claimed: { spin: false, sell: false, cars: false } }; save(); } }
+function addQuestProgress(id, amount = 1) { checkQuests(); if (G.quests.prog[id] !== undefined) { G.quests.prog[id] += amount; save(); } }
+function refQuests() { checkQuests(); $("#quests-list").innerHTML = DAILY_QUESTS.map(q => { const p = G.quests.prog[q.id] || 0, done = p >= q.target, claimed = G.quests.claimed[q.id]; return `<div class="card"><div class="t">${q.text}</div><div class="s">${p}/${q.target} (${F(q.reward)} ₽)</div><button class="btn ${claimed?'d':done?'g':'d'}" ${claimed||!done?'disabled':''} onclick="claimQ('${q.id}', ${q.reward}, ${q.target})">${claimed?'Получено':'Забрать'}</button></div>`; }).join(""); }
+function claimQ(id, reward, target) { if (G.quests.prog[id] >= target && !G.quests.claimed[id]) { G.quests.claimed[id] = true; G.bal += reward; save(); upBal(); refQuests(); Sound.buy(); } }
+function refAch() { $("#ach-list").innerHTML = `<div style="margin-bottom:10px; font-weight:bold;">Открыто: ${G.ach.length}/${S.ACH.length}</div>` + S.ACH.map(a => `<div class="card ${G.ach.includes(a.k)?'unlocked':'locked'}"><div class="t">${a.n}</div><div class="s">${a.d}</div><div style="font-size:24px; text-align:right;">${G.ach.includes(a.k) ? "✅" : "🔒"}</div></div>`).join(""); }
+function checkAch() { const salonNames = S.CARS.map(c => c.name); const allSalonOwned = salonNames.every(nm => G.cars.some(c => c.name === nm)); const cond = { first_spin: G.st.spins >= 1, spin_100: G.st.spins >= 100, spin_1000: G.st.spins >= 1000, first_rare: G.st.rare >= 1, first_epic: G.st.epic >= 1, first_leg: G.st.leg >= 1, first_sell: G.st.sold >= 1, first_car: G.cars.length >= 1, first_case: G.st.case >= 1, bal_1m: G.bal >= 1000000, cars_5: G.cars.length >= 5, cars_10: G.cars.length >= 10, all_salon_cars: allSalonOwned }; for (const k in cond) { if (cond[k] && !G.ach.includes(k)) { G.ach.push(k); const a = S.ACH.find(x => x.k === k); if (a) toast(a.n); } } }
+
+let invTab = "nums", invFilter = "all", invSort = "new", invFavOnly = false;
+function switchInvTab(t) { invTab = t; refInv(); }
+function refInv() { 
+  $("#inv-tab-nums").className = "tab-btn " + (invTab === "nums" ? "active" : "");
+  $("#inv-tab-bags").className = "tab-btn " + (invTab === "bags" ? "active" : "");
+  $("#inv-tab-frames").className = "tab-btn " + (invTab === "frames" ? "active" : "");
+  
+  if (invTab === "bags") {
+    $("#inv-filters").style.display = "none";
+    let html = `<div class="s" style="margin-bottom:10px;">Надето: Барсетка: ${G.bags.bag ? S.BAGS.find(b=>b.id===G.bags.bag).name : "Нет"} | Рюкзак: ${G.bags.backpack ? S.BAGS.find(b=>b.id===G.bags.backpack).name : "Нет"}</div>`;
+    html += G.ownedBags.map(id => {
+      const bag = S.BAGS.find(x => x.id === id);
+      const eq = G.bags[bag.type] === bag.id;
+      return `<div class="card"><div class="t">${bag.name}</div><div class="s">+${bag.slots} слотов</div><button class="btn ${eq?'d':'y'}" onclick="equipBag('${bag.id}')">${eq?'Снять':'Надеть'}</button></div>`;
+    }).join("");
+    if (!G.ownedBags.length) html += `<div class="card"><div class="t">Нет купленных сумок</div><div class="s">Купи их в Магазине!</div></div>`;
+    $("#inv-list").innerHTML = html;
+    return;
+  }
+
+  if (invTab === "frames") {
+    $("#inv-filters").style.display = "none";
+    let html = "";
+    html += G.frames.map(id => {
+      const f = S.FR[id];
+      const eq = G.frame === id;
+      return `<div class="card"><div class="t">${f.n}</div><button class="btn ${eq?'d':'y'}" onclick="G.frame='${id}'; save(); refInv(); drawPlate();">${eq?'Надето':'Надеть'}</button></div>`;
+    }).join("");
+    $("#inv-list").innerHTML = html;
+    return;
+  }
+
+  $("#inv-filters").style.display = "flex"; 
+  if ($("#inv-filters")) { 
+    $$("#inv-filters [data-filter]").forEach(b => { if (b.dataset.filter === invFilter) { b.classList.remove("d"); b.classList.add("y"); } else { b.classList.remove("y"); b.classList.add("d"); } b.onclick = () => { invFilter = b.dataset.filter; refInv(); }; }); 
+    const favBtn = $("#btn-fav-filter"); if (favBtn) { if (invFavOnly) { favBtn.classList.remove("d"); favBtn.classList.add("y"); } else { favBtn.classList.remove("y"); favBtn.classList.add("d"); } favBtn.onclick = () => { invFavOnly = !invFavOnly; refInv(); }; } 
+  } 
+  
+  let filtered = G.nums.map((x, i) => ({ ...x, originalIndex: i })); 
+  if (invFavOnly) filtered = filtered.filter(x => x.fav); 
+  if (invFilter !== "all") filtered = filtered.filter(x => x.rarity === invFilter); 
+  const rarityWeight = { common: 0, uncommon: 1, rare: 2, epic: 3, legendary: 4 }; 
+  if (invSort === "price") filtered.sort((a, b) => b.price - a.price); else if (invSort === "rarity") filtered.sort((a, b) => rarityWeight[b.rarity] - rarityWeight[a.rarity]); else filtered.sort((a, b) => a.originalIndex - b.originalIndex); 
+  
+  const limit = getInvLimit(); 
+  $("#inv-list").innerHTML = `<div class="s" style="margin-bottom:10px;">Занято: ${G.nums.length} / ${limit} слотов</div>` + (filtered.length ? filtered.map((x) => { 
+    const i = x.originalIndex; const fav = x.fav || false; 
+    const comboText = combos(x.n).map(c => {
+      if (c === "two_same_digits") return "2 одинаковые цифры";
+      if (c === "three_same_digits") return "3 одинаковые цифры";
+      if (c === "two_same_letters") return "2 одинаковые буквы";
+      if (c === "three_same_letters") return "3 одинаковые буквы";
+      if (c === "digits_in_row") return "Цифры подряд";
+      if (c === "letters_palindrome") return "Зеркальные буквы";
+      if (c === "digits_eq_region") return "Цифры = регион";
+      if (c === "gov_series") return "Гос серия";
+      if (c === "low_num") return "Малый номер";
+      if (c === "round_num") return "Круглый номер";
+      return "";
+    }).filter(x=>x).join(", ");
+    return `<div class="card"><div class="t" style="color:${S.RC[x.rarity]}">${fav ? "⭐ " : ""}${x.n}</div><div class="s">${S.RN[x.rarity]} · <span class="p">${F(x.price)} ₽</span></div><div class="s" style="font-size:11px; opacity:0.8; margin-top:-5px;">${comboText}</div><div class="a"><button class="btn ${fav ? 'y' : 'd'}" data-fav="${i}">${fav ? "В избр." : "⭐"}</button><button class="btn r" data-sell="${i}">Продать</button></div></div>`; 
+  }).join("") : `<div class="card"><div class="t">Ничего не найдено</div></div>`); 
+  
+  $$("[data-fav]").forEach(b => { b.onclick = () => { const i = parseInt(b.dataset.fav); G.nums[i].fav = !G.nums[i].fav; save(); refInv(); Sound.click(); }; }); 
+  $$("[data-sell]").forEach(b => { b.onclick = () => { const i = parseInt(b.dataset.sell); if (G.nums[i].fav) { showModal("В избранном!", "Убери из избранного.", [{ t:"ОК", cls:"y" }]); return; } sellN(i); }; }); 
+}
+function equipBag(id) {
+  const bag = S.BAGS.find(x => x.id === id);
+  if (G.bags[bag.type] === id) { G.bags[bag.type] = null; } 
+  else { G.bags[bag.type] = id; }
+  save(); refInv();
+}
+function sellN(i) { 
+  if (i < 0 || i >= G.nums.length) return; 
+  const x = G.nums[i]; G.bal += x.price; 
+  if (x.rarity === "legendary") G.usd = (G.usd || 0) + 1;
+  else if (x.rarity === "epic" && Math.random() < 0.5) G.usd = (G.usd || 0) + 1;
+  G.nums.splice(i, 1); G.st.sold++; G.st.earn += x.price; 
+  Sound.sell(); save(); upBal(); refInv(); addQuestProgress("sell", 1); checkAch(); 
+}
+function sellAll() { if (!G.nums.length) return; const toSell = G.nums.filter(x => !x.fav); const toKeep = G.nums.filter(x => x.fav); if (toSell.length === 0) { showModal("Нечего продавать", "Все в избранном.", [{ t:"ОК", cls:"y" }]); return; } let total = 0; toSell.forEach(x => total += x.price); showModal("Продать?", `Будет продано ${toSell.length} номеров на ${F(total)} ₽.`, [{ t:"Да", cls:"g", cb: () => { G.bal += total; G.st.sold += toSell.length; G.st.earn += total; G.nums = toKeep; Sound.sell(); save(); upBal(); refInv(); addQuestProgress("sell", toSell.length); checkAch(); } }, { t:"Нет", cls:"" }]); }
+// ===== АВТОПАРК И ПАРКОВКИ =====
+function refGar() {
+  let html = "";
+  if (G.cars.length === 0) html += `<div class="card"><div class="t">У вас нет машин</div><div class="s">Купите машину в автосалоне!</div></div>`;
+  else {
+    let placedCars = [];
+    if (G.parkings) G.parkings.forEach(p => { if (p.cars) p.cars.forEach(cIdx => { if (G.cars[cIdx]) placedCars.push(cIdx); }); });
+    let unplacedCars = G.cars.map((c, i) => i).filter(i => !placedCars.includes(i));
+
+    if (unplacedCars.length > 0) {
+      html += `<div class="card" style="border:1px solid #8b4513;"><div class="t" style="color:#cd7f32;">🪨 Грунтовая площадка</div><div class="s">Машины грязнятся быстро. Мойка стоит 50к.</div><div class="a"><button class="btn d" onclick="if(G.bal>=50000){G.bal-=50000;save();upBal();alert('Мойка куплена!');}else alert('Мало денег');">Купить мойку (50к)</button></div></div>`;
+      unplacedCars.forEach(i => { 
+        const c = G.cars[i]; 
+        html += `<div class="card">
+          <div class="t">${c.name}</div>
+          <div class="s">Номер: ${c.num ? c.num.n : "НЕТ"} | Состояние: ${c.condition < 100 ? 'Сломана' : 'Норма'}</div>
+          <div class="a">
+            <button class="btn d" onclick="openCarMenu(${i})">Управление</button>
+            <button class="btn r" onclick="show('market'); refMarket();">Продать</button>
+          </div>
+        </div>`; 
+      });
+    }
+  }
+
+  if (G.parkings) {
+    G.parkings.forEach((p, pIdx) => {
+      const pData = S.PARKINGS[p.type];
+      let carsOnP = "";
+      if (p.cars && p.cars.length > 0) {
+        p.cars.forEach(cIdx => { 
+          if (G.cars[cIdx]) {
+            const car = G.cars[cIdx];
+            carsOnP += `<div style="font-size:14px; margin-top:4px; color:var(--text-sec); display:flex; justify-content:space-between; align-items:center;">
+              <span>🚗 ${car.name} (${car.num ? car.num.n : 'без номера'})</span>
+              <button class="btn d" style="padding:4px 8px; min-height:auto; font-size:12px;" onclick="openCarMenu(${cIdx})">Управление</button>
+            </div>`; 
+          }
+        });
+      } else { carsOnP = `<div class="s">Пусто</div>`; }
+      
+      html += `<div class="card" style="border:1px solid var(--accent);">
+        <div class="t">${pData.name}</div>
+        <div style="margin-bottom:10px;">${carsOnP}</div>
+        <div class="s">Навес: ${p.canopy?'✅':'❌'} | Стены: ${p.walls?'✅':'❌'} | Мойка: ${p.wash?'✅':'❌'}</div>
+        <div class="a">
+          <button class="btn d" onclick="openParkingUpgrades(${pIdx})">Улучшения</button>
+          <button class="btn y" onclick="openMoveToParking(${pIdx})">Поставить машину</button>
+        </div>
+      </div>`;
+    });
+  }
+  $("#garage-list").innerHTML = html;
+}
+
+function openCarMenu(carIdx) {
+  const c = G.cars[carIdx]; if (!c) return;
+  let html = `<div class="card"><div class="t">${c.name}</div>`;
+  if (c.num) html += `<div class="s">Номер: <b>${c.num.n}</b></div><button class="btn d" onclick="removeNumFromCar(${carIdx})">Снять номер</button>`;
+  else html += `<div class="s">Номер: НЕТ</div><button class="btn y" onclick="putNumOnCar(${carIdx})">Установить номер</button>`;
+  
+  html += `<div style="display:flex; gap:8px; margin-top:10px;">
+    <button class="btn d" style="flex:1;" onclick="washCar(${carIdx})">Помыть (5к)</button>
+    <button class="btn d" style="flex:1; ${c.condition >= 100 ? 'opacity:0.5;' : ''}" ${c.condition >= 100 ? 'disabled' : ''} onclick="repairCar(${carIdx})">Починить (${F(Math.floor(c.price*0.2))} ₽)</button>
+  </div>`;
+  html += `<button class="btn y" style="margin-top:10px;" onclick="openTrunk(${carIdx})">Открыть багажник</button></div>`;
+  showModal("Управление машиной", "", [{ t:"Закрыть", cls:"" }], html);
+}
+function washCar(carIdx) {
+  if (G.bal < 5000) return alert("Мало денег!");
+  G.bal -= 5000; G.cars[carIdx].condition = 100; save(); upBal(); $("#modal").classList.remove("on"); refGar(); toast("Машина помыта!");
+}
+function repairCar(carIdx) {
+  const c = G.cars[carIdx]; const cost = Math.floor(c.price * 0.2);
+  if (G.bal < cost) return alert("Мало денег!");
+  G.bal -= cost; c.condition = 100; save(); upBal(); $("#modal").classList.remove("on"); refGar(); toast("Машина починена!");
+}
+function putNumOnCar(carIdx) {
+  if (!G.nums.length) return alert("У тебя нет номеров!");
+  let html = G.nums.map((n, i) => `<div class="card"><div class="t" style="color:${S.RC[n.rarity]}">${n.n}</div><button class="btn y" onclick="installNum(${carIdx}, ${i})">Установить</button></div>`).join("");
+  showModal("Выбери номер", "", [{ t:"Отмена", cls:"" }], html);
+}
+function installNum(carIdx, numIdx) { G.cars[carIdx].num = G.nums.splice(numIdx, 1)[0]; save(); $("#modal").classList.remove("on"); refGar(); }
+function removeNumFromCar(carIdx) { G.nums.unshift(G.cars[carIdx].num); G.cars[carIdx].num = null; save(); $("#modal").classList.remove("on"); refGar(); }
+
+function openTrunk(carIdx) {
+  let c = G.cars[carIdx];
+  if (!c.trunk) c.trunk = [];
+  let max = c.class === 'low' ? 30 : c.class === 'mid' ? 20 : c.class === 'high' ? 5 : 200;
+  let html = `<div class="s">В багажнике: ${c.trunk.length} / ${max}</div>`;
+  html += `<button class="btn y" style="margin-bottom:10px;" onclick="putNumInTrunk(${carIdx})">Положить номер</button>`;
+  c.trunk.forEach((n, i) => {
+    html += `<div class="card"><div class="t" style="color:${S.RC[n.rarity]}">${n.n}</div><button class="btn d" onclick="takeNumFromTrunk(${carIdx}, ${i})">Достать</button></div>`;
+  });
+  showModal("Багажник", "", [{ t:"Закрыть", cls:"" }], html);
+}
+function putNumInTrunk(carIdx) {
+  let c = G.cars[carIdx]; if (!c.trunk) c.trunk = [];
+  let max = c.class === 'low' ? 30 : c.class === 'mid' ? 20 : c.class === 'high' ? 5 : 200;
+  if (c.trunk.length >= max) return alert("Багажник полон!");
+  let html = G.nums.map((n, i) => `<div class="card"><div class="t" style="color:${S.RC[n.rarity]}">${n.n}</div><button class="btn y" onclick="G.cars[${carIdx}].trunk.push(G.nums.splice(${i},1)[0]); save(); openTrunk(${carIdx});">Положить</button></div>`).join("");
+  if (!G.nums.length) html = "Нет номеров в инвентаре.";
+  showModal("Выбери номер", "", [{ t:"Отмена", cls:"" }], html);
+}
+function takeNumFromTrunk(carIdx, numIdx) { G.nums.unshift(G.cars[carIdx].trunk.splice(numIdx, 1)[0]); save(); openTrunk(carIdx); }
+
+function buyParking() {
+  let html = Object.keys(S.PARKINGS).map(k => { const p = S.PARKINGS[k]; return `<div class="card"><div class="t">${p.name}</div><div class="p">${F(p.price)} ₽</div><button class="btn y" onclick="doBuyParking('${k}')">Купить</button></div>`; }).join("");
+  showModal("Выбрать парковку", "", [{ t:"Отмена", cls:"" }], html);
+}
+function doBuyParking(k) { const p = S.PARKINGS[k]; if (G.bal >= p.price) { G.bal -= p.price; G.parkings.push({ type: k, canopy: false, walls: false, wash: false, cars: [] }); save(); upBal(); $("#modal").classList.remove("on"); refGar(); } else alert("Мало денег!"); }
+function openParkingUpgrades(pIdx) { const p = G.parkings[pIdx]; const data = S.PARKINGS[p.type]; let html = ""; if (!p.canopy) html += `<div class="card"><div class="t">Навес</div><div class="p">${F(data.canopyPrice)} ₽</div><button class="btn y" onclick="buyUpgrade(${pIdx}, 'canopy')">Купить</button></div>`; else if (!p.walls) html += `<div class="card"><div class="t">Стены (нужен навес)</div><div class="p">${F(data.wallsPrice)} ₽</div><button class="btn y" onclick="buyUpgrade(${pIdx}, 'walls')">Купить</button></div>`; if (!p.wash) html += `<div class="card"><div class="t">Мойка</div><div class="p">${F(data.washPrice)} ₽</div><button class="btn y" onclick="buyUpgrade(${pIdx}, 'wash')">Купить</button></div>`; if(!html) html = "<div class='s'>Всё куплено.</div>"; showModal("Улучшения парковки", "", [{ t:"Закрыть", cls:"" }], html); }
+function buyUpgrade(pIdx, type) { const p = G.parkings[pIdx]; const data = S.PARKINGS[p.type]; let price = data[type + "Price"]; if (G.bal >= price) { G.bal -= price; p[type] = true; save(); upBal(); showModal("Куплено!", "", [{ t:"ОК", cls:"y", cb: () => openParkingUpgrades(pIdx) }]); } else alert("Мало денег!"); }
+function openMoveToParking(pIdx) { let html = ""; G.cars.forEach((c, i) => { let isPlaced = false; G.parkings.forEach(p => { if (p.cars && p.cars.includes(i)) isPlaced = true; }); if (!isPlaced) html += `<div class="card"><div class="t">${c.name}</div><button class="btn y" onclick="placeCar(${pIdx}, ${i})">Поставить</button></div>`; }); if (!html) html = "Все машины припаркованы."; showModal("Выбрать машину", "", [{ t:"Отмена", cls:"" }], html); }
+function placeCar(pIdx, cIdx) { const p = G.parkings[pIdx]; if (!p.cars) p.cars = []; p.cars.push(cIdx); save(); $("#modal").classList.remove("on"); refGar(); Sound.click(); }
+
+// ===== АВТОСАЛОН =====
+let dealTab = "low";
+function switchDealTab(t) {
+  dealTab = t;
+  ["low","mid","high","cargo"].forEach(x => { const btn = $("#tab-"+x); if(btn) { if(x===t) btn.classList.add("active"); else btn.classList.remove("active"); } });
+  refDeal();
+}
+function refDeal() {
+  const cars = S.CARS.filter(c => c.class === dealTab);
+  $("#deal-list").innerHTML = cars.map((c) => `<div class="card"><div class="t">${c.name}</div><div class="p">${F(c.price)} ₽</div><div class="a"><button class="btn y" data-buy="${c.name}">Купить</button></div></div>`).join("");
+  $$("[data-buy]").forEach(b => { b.onclick = () => buyC(b.dataset.buy); });
+}
+function buyC(name) {
+  const c = S.CARS.find(x => x.name === name);
+  if (G.bal < c.price) { showModal("Мало денег", "", [{ t:"ОК", cls:"y" }]); return; }
+  showModal("Покупка Т/С", `Вы уверены, что хотите купить ${c.name} за ${F(c.price)} ₽?`, [
+    { t:"Купить", cls:"y", cb: () => {
+      G.bal -= c.price; G.cars.push({ name:c.name, num:null, price:c.price, class:c.class, condition:100 }); 
+      Sound.buy(); save(); upBal(); refDeal(); addQuestProgress("cars", 1); checkAch();
+    }},
+    { t:"Отмена", cls:"" }
+  ]);
+}
+
+// ===== МАГАЗИН =====
+let shopTab = "boost";
+function switchShopTab(t) {
+  shopTab = t;
+  ["boost","bags","skin","themes"].forEach(x => { const btn = $("#stab-"+x); if(btn) { if(x===t) btn.classList.add("active"); else btn.classList.remove("active"); } });
+  refShop();
+}
+function refShop() {
+  let html = "";
+  if (shopTab === "boost") {
+    html = `<div class="card"><div class="t">Удача ×2 (3 мин)</div><div class="p">100 000 ₽</div><button class="btn y" id="sh-boost">Купить</button></div>
+            <div class="card"><div class="t">Мультиклик ×2 (2 мин)</div><div class="p">350 000 ₽</div><button class="btn y" id="sh-boost-click">Купить</button></div>
+            <div class="card">
+              <div class="t">Автопродажа обычных</div>
+              <div class="s">Автоматически продает обычные номера.</div>
+              <button class="btn ${G.settings.auto_sell_common ? 'g' : 'y'}" id="sh-auto-common">
+                ${G.settings.bought_auto_common ? (G.settings.auto_sell_common ? 'ВКЛ' : 'ВЫКЛ') : 'Купить (500к)'}
+              </button>
+            </div>
+            <div class="card">
+              <div class="t">Автопродажа редких</div>
+              <div class="s">Автоматически продает редкие номера.</div>
+              <button class="btn ${G.settings.auto_sell_rare ? 'g' : 'y'}" id="sh-auto-rare">
+                ${G.settings.bought_auto_rare ? (G.settings.auto_sell_rare ? 'ВКЛ' : 'ВЫКЛ') : 'Купить (2кк)'}
+              </button>
+            </div>`;
+  } else if (shopTab === "bags") {
+    html = S.BAGS.map(b => {
+      const owned = G.ownedBags.includes(b.id);
+      const currency = b.currency === "usd" ? "$" : "₽";
+      return `<div class="card"><div class="t">${b.name}</div><div class="s">+${b.slots} слотов</div><div class="p">${F(b.price)} ${currency}</div><button class="btn ${owned?'d':'y'}" data-bag="${b.id}" ${owned?'disabled':''}>${owned?'Куплено':'Купить'}</button></div>`;
+    }).join("");
+  } else if (shopTab === "skin") {
+    html = S.FO.map(k => {
+      const own = G.frames.includes(k);
+      const eq = G.frame === k;
+      return `<div class="card"><div class="t">${S.FR[k].n}</div><div class="p">${own ? 'Куплено' : F(S.FR[k].p) + " ₽"}</div><button class="btn ${eq?'d':own?'y':'y'}" data-fr="${k}" ${eq?'disabled':''}>${eq?'Надето':own?'Надеть':'Купить'}</button></div>`;
+    }).join("");
+  } else if (shopTab === "themes") {
+    html = S.THEMES.map(t => {
+      const owned = G.themes.includes(t.id) || t.id === "theme-default";
+      const active = G.theme === t.id;
+      let txt = "Купить"; if (active) txt = "Активна"; else if (owned) txt = "Надеть";
+      return `<div class="card"><div class="t">${t.name} тема</div><div class="p">${active ? "Активна" : (owned ? "Куплена" : F(t.price) + " ₽")}</div><button class="btn ${active?'d':'y'}" data-theme="${t.id}" ${active?'disabled':''}>${txt}</button></div>`;
+    }).join("");
+  }
+  $("#shop-list").innerHTML = html;
+  
+  if (shopTab === "boost") {
+    $("#sh-boost").onclick = () => { if (G.bal >= 100000) { G.bal -= 100000; G.boost = NOW() + 180*SEC; save(); upBal(); Sound.buy(); } };
+    $("#sh-boost-click").onclick = () => { if (G.bal >= 350000) { G.bal -= 350000; G.boost_click = NOW() + 120*SEC; save(); upBal(); Sound.buy(); } };
+    
+    $("#sh-auto-common").onclick = () => { 
+      if (!G.settings.bought_auto_common) {
+        if (G.bal >= 500000) { G.bal -= 500000; G.settings.bought_auto_common = true; G.settings.auto_sell_common = true; save(); upBal(); refShop(); Sound.buy(); }
+        else alert("Мало денег!");
+      } else {
+        G.settings.auto_sell_common = !G.settings.auto_sell_common; save(); refShop();
+      }
+    };
+    
+    $("#sh-auto-rare").onclick = () => { 
+      if (!G.settings.bought_auto_rare) {
+        if (G.bal >= 2000000) { G.bal -= 2000000; G.settings.bought_auto_rare = true; G.settings.auto_sell_rare = true; save(); upBal(); refShop(); Sound.buy(); }
+        else alert("Мало денег!");
+      } else {
+        G.settings.auto_sell_rare = !G.settings.auto_sell_rare; save(); refShop();
+      }
+    };
+  } else if (shopTab === "bags") {
+    $$("[data-bag]").forEach(b => { b.onclick = () => { 
+      const item = S.BAGS.find(x => x.id === b.dataset.bag); 
+      if (item.currency === "usd") {
+        if ((G.usd || 0) >= item.price) { G.usd -= item.price; G.ownedBags.push(item.id); save(); upBal(); refShop(); Sound.buy(); } else alert("Мало долларов!");
+      } else {
+        if (G.bal >= item.price) { G.bal -= item.price; G.ownedBags.push(item.id); save(); upBal(); refShop(); Sound.buy(); } else alert("Мало денег");
+      }
+    }; });
+  } else if (shopTab === "skin") {
+    $$("[data-fr]").forEach(b => { b.onclick = () => { 
+      const k = b.dataset.fr; 
+      if (G.frames.includes(k)) { G.frame = k; save(); refShop(); drawPlate(); } 
+      else { if (G.bal >= S.FR[k].p) { G.bal -= S.FR[k].p; G.frames.push(k); G.frame = k; save(); upBal(); refShop(); drawPlate(); Sound.buy(); } else alert("Мало денег"); } 
+    }; });
+  } else if (shopTab === "themes") {
+    $$("[data-theme]").forEach(b => { b.onclick = () => { 
+      const t = S.THEMES.find(x => x.id === b.dataset.theme); 
+      const owned = G.themes.includes(t.id) || t.id === "theme-default";
+      
+      if (owned) {
+        G.theme = t.id; 
+        document.body.className = ''; 
+        if (G.settings.light_theme) document.body.classList.add('light');
+        if (t.id !== "theme-default") document.body.classList.add(t.id);
+        save(); refShop(); 
+      } else {
+        if (G.bal >= t.price) { 
+          G.bal -= t.price; 
+          G.themes.push(t.id); 
+          G.theme = t.id; 
+          document.body.className = ''; 
+          if (G.settings.light_theme) document.body.classList.add('light');
+          document.body.classList.add(t.id);
+          save(); upBal(); refShop(); Sound.buy(); 
+        } else alert("Мало денег"); 
+      }
+    }; });
+  }
+}
+// ===== КЕЙСЫ =====
+function refCases() { 
+  const t = NOW(); 
+  $("#cases-list").innerHTML = S.CASES.map((c, i) => { 
+    const lim = G.lim[i] || {c:0,r:0}, cd = lim.c >= 10 && t < lim.r; 
+    const icons = ["📦","🥈","🥇"]; const clsArr = ["c-bronze","c-silver","c-gold"]; 
+    return `<div class="case ${clsArr[i]||''} ${cd?'locked':''}" onclick="openCase(${i})"><div class="i">${icons[i]||'📦'}</div><div class="n">${c.n}</div><div class="p">${F(c.p)} ₽</div></div>`; 
+  }).join(""); 
+}
+function openCase(i) {
+  if (G.bal < S.CASES[i].p) return showModal("Мало денег", "", [{t:"ОК",cls:"y"}]);
+  G.bal -= S.CASES[i].p; upBal(); 
+  
+  $("#mt").textContent = "Открываем..."; $("#mp").textContent = ""; 
+  $("#me").innerHTML = `<div id="case-anim" style="font-size:80px; margin:20px 0;">📦</div>`; 
+  $("#mb").innerHTML = ""; $("#modal").classList.add("on");
+  
+  // Анимация прокрута
+  const animIcons = ["💵", "📦", "🚗", "🎁", "💰", "🔑", "🎫"];
+  let ticks = 0;
+  const anim = setInterval(() => {
+    const el = $("#case-anim"); if (el) el.textContent = R(animIcons);
+    ticks++;
+    if (ticks > 15) {
+      clearInterval(anim);
+      $("#modal").classList.remove("on"); const c = S.CASES[i]; const r = RND(); let a = 0, rw = c.r[c.r.length-1];
+      for (const x of c.r) { a += x.c; if (r <= a) { rw = x; break; } }
+      G.st.case++; Sound.buy();
+      if (rw.t === "m") { G.bal += rw.v; showModal("Выпало:", `+${F(rw.v)} ₽`, [{t:"ОК",cls:"y"}]); }
+      else if (rw.t === "num") { const n = genR(rw.rarity); G.nums.unshift({n, rarity:rw.rarity, price:price(n)}); showModal("Выпало:", `Номер: ${n}`, [{t:"ОК",cls:"y"}]); }
+      else if (rw.t === "car") { const cr = [...S.CARS,...S.CASE_ONLY].find(x=>x.name===rw.name); G.cars.push({name:rw.name, num:null, price:cr?cr.price:0, class:cr?cr.class:"mid", condition:100}); showModal("Выпало:", `Машина: ${rw.name}`, [{t:"ОК",cls:"y"}]); }
+      save(); upBal(); refCases(); checkAch();
+    }
+  }, 80);
+}
+
+// ===== АВТОРЫНОК =====
+function refMarket() {
+  if (!window.marketListings) { window.marketListings = []; for(let i=0; i<5; i++) { const car = R(S.CARS); const isBroken = Math.random() < 0.3; const price = Math.floor(car.price * (isBroken ? 0.5 : 0.9)); window.marketListings.push({ car: car.name, price, broken: isBroken, class: car.class }); } }
+  
+  let myCarsHtml = "";
+  G.cars.forEach((c, i) => {
+    if (c.isForSale) {
+      myCarsHtml += `<div class="card" style="border:1px solid #3cc850;"><div class="t">${c.name}</div><div class="s" style="color:#3cc850">На продаже за ${F(c.salePrice)} ₽</div><button class="btn r" onclick="cancelSale(${i})">Снять с продажи</button></div>`;
+    } else {
+      myCarsHtml += `<div class="card"><div class="t">${c.name}</div><div class="a"><button class="btn y" onclick="sellMyCar(${i})">Выставить</button></div></div>`;
+    }
+  });
+
+  $("#market-list").innerHTML = 
+    `<div class="card"><div class="t" style="color:var(--accent);">Мои машины на продажу:</div><div class="s" style="margin-bottom:10px;">Выставляй свои тачки, чтобы продать их ботам.</div>${myCarsHtml}</div>` +
+    `<div class="s" style="margin:20px 0 10px 0; font-weight:bold;">Предложения ботов:</div>` + 
+    window.marketListings.map((l, i) => `<div class="card"><div class="t">${l.car}</div><div class="s">Состояние: ${l.broken ? 'Сломана' : 'Норма'}</div><div class="p">${F(l.price)} ₽</div><div class="a"><button class="btn y" onclick="buyMarketCar(${i})">Купить</button></div></div>`).join("");
+}
+function buyMarketCar(i) { const l = window.marketListings[i]; if (G.bal >= l.price) { G.bal -= l.price; G.cars.push({ name:l.car, num:null, price:Math.floor(l.price*1.2), class:l.class, condition:l.broken?0:100 }); window.marketListings.splice(i,1); save(); upBal(); refMarket(); Sound.buy(); } else alert("Мало денег"); }
+function cancelSale(carIdx) { G.cars[carIdx].isForSale = false; G.cars[carIdx].salePrice = 0; save(); refMarket(); }
+function sellMyCar(carIdx) {
+  const c = G.cars[carIdx];
+  showModal("Продажа машины", `Максимальная цена: ${F(c.price)} ₽`, [
+    { t:"Выставить", cls:"y", cb: () => {
+      const price = parseInt($("#modal-input").value);
+      if (price > 0 && price <= c.price) {
+        c.isForSale = true; c.salePrice = price; 
+        const uniqueId = Date.now(); 
+        c.saleId = uniqueId;
+        save(); refMarket();
+        setTimeout(() => {
+          const idx = G.cars.findIndex(x => x.saleId === uniqueId);
+          if (idx !== -1 && G.cars[idx].isForSale) { G.bal += G.cars[idx].salePrice; G.cars.splice(idx, 1); save(); upBal(); refMarket(); toast("Машина продана!"); }
+        }, 15000);
+      } else { alert("Цена не может быть больше, чем в автосалоне!"); }
+    }},
+    { t:"Отмена", cls:"" }
+  ], `<input type="number" id="modal-input" placeholder="Цена в ₽" max="${c.price}">`);
+}
+
+// ===== БИЗНЕСЫ =====
+function refBiz() {
+  let html = "";
+  S.BIZ.forEach(b => {
+    const state = G.biz[b.id];
+    if (state.lvl === 0) html += `<div class="card"><div class="t">${b.name}</div><div class="s">Доход: ${F(b.income)} ₽/день</div><div class="p">${F(b.price)} ₽</div><button class="btn y" onclick="buyBiz('${b.id}')">Купить</button></div>`;
+    else { const canCollect = NOW() - state.last >= 86400000; html += `<div class="card"><div class="t">${b.name}</div><div class="s">Доход: ${F(b.income)} ₽/день</div><div class="a"><button class="btn g" ${canCollect?'':'disabled'} onclick="collectBiz('${b.id}')">${canCollect ? 'Забрать ' + F(b.income) + ' ₽' : 'Ждать'}</button><button class="btn r" onclick="sellBiz('${b.id}')">Продать</button></div></div>`; }
+  });
+  $("#biz-list").innerHTML = html;
+}
+function buyBiz(id) { const b = S.BIZ.find(x=>x.id===id); if(G.bal >= b.price) { G.bal -= b.price; G.biz[id] = {lvl:1, last:NOW()}; save(); upBal(); refBiz(); } else alert("Мало денег"); }
+function collectBiz(id) { const b = S.BIZ.find(x=>x.id===id); const st = G.biz[id]; if(NOW() - st.last >= 86400000) { G.bal += b.income; st.last = NOW(); save(); upBal(); refBiz(); } }
+function sellBiz(id) { const b = S.BIZ.find(x=>x.id===id); if(confirm("Продать бизнес за 50%?")) { G.bal += b.price*0.5; G.biz[id] = {lvl:0, last:0}; save(); upBal(); refBiz(); } }
+
+// ===== ПРОМОКОДЫ =====
+function refPromo() {
+  $("#promo-list").innerHTML = `
+    <div class="card">
+      <div class="t">Ввод промокода</div>
+      <div class="s">Введи код и получи награду! Каждый код работает 1 раз.</div>
+      <input type="text" id="promo-input" placeholder="Например, #B96IR" style="margin-top:10px;">
+      <button class="btn y" id="btn-activate-promo">Активировать</button>
+    </div>
+  `;
+  $("#btn-activate-promo").onclick = () => {
+    const code = $("#promo-input").value.trim().toUpperCase();
+    if (!code) return;
+    if (!S.PROMOS[code]) return alert("Неверный промокод!");
+    if (G.used_promos.includes(code)) return alert("Вы уже активировали этот промокод!");
+
+    const p = S.PROMOS[code];
+    if (p.type === "money") { G.bal += p.val; showModal("Успех!", `Вы получили ${F(p.val)} ₽!`, [{t:"ОК",cls:"y"}]); }
+    else if (p.type === "boost") { 
+      if (p.val === "luck") G.boost = NOW() + 600*SEC;
+      if (p.val === "click") G.boost_click = NOW() + 300*SEC;
+      showModal("Успех!", `Буст активирован!`, [{t:"ОК",cls:"y"}]);
+    }
+    else if (p.type === "car") { const c = [...S.CARS, ...S.CASE_ONLY].find(x=>x.name===p.val); G.cars.push({name:p.val, num:null, price:c?c.price:0, class:c?c.class:"mid", condition:100}); showModal("Успех!", `Вы получили машину: ${p.val}!`, [{t:"ОК",cls:"y"}]); }
+    else if (p.type === "bag") { if(!G.ownedBags.includes(p.val)) G.ownedBags.push(p.val); showModal("Успех!", `Вы получили сумку!`, [{t:"ОК",cls:"y"}]); }
+    else if (p.type === "num") { const n = genR(p.val); G.nums.unshift({n, rarity:p.val, price:price(n)}); showModal("Успех!", `Вы получили ${p.val} номер!`, [{t:"ОК",cls:"y"}]); }
+    else if (p.type === "god") { G.bal += 100000000; const n = genR("legendary"); G.nums.unshift({n, rarity:"legendary", price:price(n)}); showModal("Успех!", `БОЖЕСТВЕННО! 100кк и Легендарный номер!`, [{t:"ОК",cls:"y"}]); }
+
+    G.used_promos.push(code); save(); upBal(); $("#promo-input").value = "";
+  };
+}
+
+// ===== КАЛЕНДАРЬ =====
+function refCal() {
+  const now = NOW();
+  if (!G.calendar) G.calendar = { day: 1, last_claim: 0 };
+  const rewards = [10000, 30000, 50000, 100000, 250000, 500000, "car"];
+  let html = `<div class="card"><div class="t">Ежедневный календарь</div><div class="s">Заходи каждый день и забирай награды!</div></div>`;
+  for (let i=0; i<7; i++) {
+    const claimed = (i < (G.calendar.day - 1));
+    const isCurrent = (i === (G.calendar.day - 1));
+    const canClaim = isCurrent && (now - (G.calendar.last_claim || 0) > 86400000);
+    let rwText = typeof rewards[i] === "number" ? F(rewards[i]) + " ₽" : "Машина!";
+    html += `<div class="card" style="${claimed ? 'opacity:0.5;' : ''} ${isCurrent ? 'box-shadow:inset 0 0 0 2px #ffc93c;' : ''}"><div class="t">День ${i+1}</div><div class="s">${rwText}</div>${isCurrent ? `<button class="btn y" data-claim-day="${i}" ${!canClaim ? 'disabled' : ''}>${canClaim ? 'Забрать' : 'Ждать'}</button>` : ''}</div>`;
+  }
+  $("#cal-list").innerHTML = html;
+  $$("[data-claim-day]").forEach(btn => { btn.onclick = () => {
+    const rw = rewards[G.calendar.day - 1];
+    if (typeof rw === "number") G.bal += rw; else G.cars.push({ name: "Ford Mustang", num:null, price:3500000, class: "high", condition:100 });
+    G.calendar.last_claim = now; G.calendar.day = (G.calendar.day % 7) + 1;
+    Sound.buy(); save(); upBal(); refCal(); showModal("Награда!", "Вы забрали награду!", [{ t:"ОК", cls:"y" }]);
+  }; });
+}
+// ===== СТАТИСТИКА, ПРОФИЛЬ И ПОМОЩЬ =====
+function refStats() { 
+  let expensiveNum = G.nums.slice().sort((a,b)=>b.price-a.price)[0]?.n || "Нет";
+  let expensiveCar = G.cars.slice().sort((a,b)=>b.price-a.price)[0]?.name || "Нет";
+  $("#stats-list").innerHTML = `
+    <div class="card"><div class="t">Рекорды</div><div class="s">Самый дорогой номер: <b>${expensiveNum}</b><br>Самая дорогая машина: <b>${expensiveCar}</b></div></div>
+    <div class="card"><div class="t">Всего прокрутов</div><div class="p">${G.st.spins}</div></div>
+    <div class="card"><div class="t">Всего продано</div><div class="p">${G.st.sold}</div></div>
+    <div class="card"><div class="t">Всего кейсов</div><div class="p">${G.st.case}</div></div>
+    <div class="card"><div class="t">Выпало редкостей:</div><div class="s">Обычные: ${G.st.common}<br>Необычные: ${G.st.uncommon}<br>Редкие: ${G.st.rare}<br>Эпики: ${G.st.epic}<br>Легенды: ${G.st.leg}</div></div>
+  `; 
+}
+function refProfile() {
+  let roleText = G.isDev ? `<div class="card"><div class="t" style="color:#ff3c3c">Должность: ${G.devRole}</div></div>` : "";
+  $("#profile-list").innerHTML = `${roleText}
+    <div class="card"><div class="t">Ник: ${G.nick}</div><button class="btn y" id="btn-edit-nick">Изменить (1кк)</button></div>
+    <div class="card"><div class="t">Уровень ${G.level} — ${getTitle(G.level)}</div><div class="s">Опыт: ${G.exp}</div></div>
+  `;
+  $("#btn-edit-nick").onclick = () => { if(G.bal>=1000000){ G.bal-=1000000; showModal("Ник","",[{t:"ОК",cls:"y",cb:()=>{G.nick=$("#modal-input").value||G.nick;save();refProfile();}}],`<input id="modal-input" value="${G.nick}">`); } else alert("Мало денег"); };
+}
+function refHelp() {
+  const helpData = [
+    { title: "Крутить", desc: "Тратит 3000 ₽ и выдает случайный номер." },
+    { title: "Автопарк", desc: "Ставь номера на машины, покупай парковки и мойки." },
+    { title: "Инвентарь", desc: "Храни номера, надевай купленные сумки и рамки." },
+    { title: "Центр", desc: "Твой телефон со всеми приложениями (кейсы, рынок, бизнесы, промокоды)." }
+  ];
+  let html = helpData.map(h => `<div class="card"><div class="t">${h.title}</div><div class="s" style="margin-bottom:10px;">${h.desc}</div></div>`).join("");
+  html += `<div class="card" style="margin-top:20px;"><div class="t">Тех. поддержка</div><button class="btn y" onclick="window.open('https://t.me/Raze_Moff','_blank')">Перейти в Telegram</button></div>`;
+  $("#help-list").innerHTML = html;
+}
+
+// ===== НАСТРОЙКИ =====
+function refSettings() {
+  const s = G.settings;
+  let adminBtn = G.isDev ? `<div class="card"><div class="t">Админка</div><button class="btn r" onclick="show('admin'); refAdmin();">Войти</button></div>` : "";
+  $("#settings-list").innerHTML = `
+    <div class="card"><div class="t">Светлая тема</div><button class="btn ${s.light_theme?'g':'d'}" onclick="G.settings.light_theme=!G.settings.light_theme; document.body.classList.toggle('light', G.settings.light_theme); save(); refSettings();">${s.light_theme?'ВКЛ':'ВЫКЛ'}</button></div>
+    <div class="card"><div class="t">Планшетный режим</div><button class="btn ${s.tablet_mode?'g':'d'}" onclick="G.settings.tablet_mode=!G.settings.tablet_mode; document.body.classList.toggle('tablet-mode', G.settings.tablet_mode); save(); refSettings();">${s.tablet_mode?'ВКЛ':'ВЫКЛ'}</button></div>
+    <div class="card"><div class="t">Режим энергосбережения</div><button class="btn ${s.energy_save?'g':'d'}" onclick="G.settings.energy_save=!G.settings.energy_save; save(); refSettings();">${s.energy_save?'ВКЛ':'ВЫКЛ'}</button></div>
+    <div class="card"><div class="t">Музыка</div><button class="btn ${s.music?'g':'d'}" onclick="G.settings.music=!G.settings.music; if(G.settings.music)Music.start(); else Music.stop(); save(); refSettings();">${s.music?'ВКЛ':'ВЫКЛ'}</button></div>
+    <div class="card"><div class="t">Громкость</div><input type="range" min="0" max="100" value="${Math.round(s.music_vol*100)}" oninput="G.settings.music_vol=this.value/100; if(Music.master) Music.master.gain.value=G.settings.music_vol; save();"></div>
+    <div class="card">
+  <div class="t">Что нового</div>
+  <button class="btn y" onclick="showModal('Что нового v20', 'Добавлено: • Огромные сумки за $ • Новые темы (Золотая, Розовая, Синяя) • 30 промокодов • Магазин вынесен в нижнее меню • Планшетный режим • Исправлены все баги', [{t:'ОК',cls:'y'}])">Открыть</button>
+</div>
+    ${adminBtn}
+    <div class="card"><div class="t">Сброс прогресса</div><button class="btn r" onclick="if(confirm('Удалить ВЕСЬ прогресс?')){localStorage.clear();location.reload();}">Удалить всё</button></div>
+  `;
+}
+
+// ===== АДМИНКА =====
+function refAdmin() {
+  $("#admin-list").innerHTML = `
+    <div class="card"><div class="t">Рубли (₽)</div><input type="number" id="adm-m" placeholder="Сумма"><div style="display:flex; gap:8px;"><button class="btn g" onclick="G.bal+=parseInt($('#adm-m').value)||0;save();upBal();">Дать</button><button class="btn r" onclick="G.bal=Math.max(0, G.bal-(parseInt($('#adm-m').value)||0));save();upBal();">Отнять</button></div></div>
+    <div class="card"><div class="t">Доллары ($)</div><input type="number" id="adm-usd" placeholder="Сумма"><div style="display:flex; gap:8px;"><button class="btn g" onclick="G.usd+=parseInt($('#adm-usd').value)||0;save();upBal();">Дать</button><button class="btn r" onclick="G.usd=Math.max(0, G.usd-(parseInt($('#adm-usd').value)||0));save();upBal();">Отнять</button></div></div>
+  `;
+}
+
+// ===== ЦЕНТР =====
+function setCenterTab(tab) {
+  ["game","econ","profile"].forEach(x => { const btn = $("#ctab-"+x); if(btn) { if(x===tab) btn.classList.add("active"); else btn.classList.remove("active"); } });
+  const apps = {
+    game: [ {a:"cases", i:"📦", n:"Кейсы"}, {a:"quests", i:"📋", n:"Задания"}, {a:"calendar", i:"📅", n:"Календарь"}, {a:"promo", i:"🎁", n:"Промокоды"} ],
+    econ: [ {a:"market", i:"💼", n:"Авторынок"}, {a:"biz", i:"🏢", n:"Бизнесы"} ],
+    profile: [ {a:"profile", i:"👤", n:"Профиль"}, {a:"stats", i:"📊", n:"Статистика"}, {a:"ach", i:"🏅", n:"Достижения"}, {a:"help", i:"❓", n:"Помощь"} ]
+  };
+  $("#center-apps-container").innerHTML = `<div class="apps">` + apps[tab].map(x => `<div class="app" onclick="handleAppClick('${x.a}')"><div class="i">${x.i}</div><div class="n">${x.n}</div></div>`).join("") + `</div>`;
+}
+function handleAppClick(a) {
+  Sound.click();
+  if (a === "cases") { show("cases"); refCases(); } else if (a === "quests") { show("quests"); refQuests(); } 
+  else if (a === "ach") { show("ach"); refAch(); } else if (a === "stats") { show("stats"); refStats(); } 
+  else if (a === "profile") { show("profile"); refProfile(); } else if (a === "market") { show("market"); refMarket(); } 
+  else if (a === "biz") { show("biz"); refBiz(); } else if (a === "calendar") { show("cal"); refCal(); } 
+  else if (a === "help") { show("help"); refHelp(); } else if (a === "promo") { show("promo"); refPromo(); }
+}
+
+// ===== ТУТОРИАЛ =====
+let tutStep = 0;
+function runTutorial() {
+  tutStep = 1;
+  showModal("🎓 Обучение (1/3)", "Привет! Добро пожаловать в Номерной Магнат. Здесь ты крутишь номера и зарабатываешь деньги. Твоя задача — нажать на кнопку 'КРУТИТЬ'.", [
+    { t:"Хорошо", cls:"y", cb: () => { 
+      tutStep = 2; 
+      // Подсвечиваем кнопку
+      const btn = $("#spin"); if(btn) { btn.style.boxShadow = "0 0 20px 10px #ffd93d"; }
+      showModal("🎓 Обучение (2/3)", "Отлично! Первый прокрут бесплатный (деньги вернем). Нажми 'КРУТИТЬ', чтобы получить свой первый номер.", [{ t:"Понятно", cls:"y" }]);
+    }},
+    { t:"Пропустить", cls:"r", cb: () => { tutStep = 0; G.nick_changed_once = true; save(); } }
+  ]);
+}
+
+// ===== БИНДЫ И ЗАПУСК =====
+function bind() {
+  $$("[data-nav]").forEach(b => { b.onclick = () => { Sound.click(); const t = b.dataset.nav; show(t); if (t === "main") refMain(); else if (t === "inv") refInv(); else if (t === "garage") refGar(); else if (t === "deal") refDeal(); else if (t === "phone") setCenterTab('game'); else if (t === "shop") refShop(); }; });
+  $("#spin").onclick = () => { 
+    Sound.tone(440, 0.05); 
+    if (tutStep === 2) { 
+      // В туториале даем бонус
+      G.bal += 3000; 
+      tutStep = 3;
+      showModal("🎓 Обучение (3/3)", "Супер! Твой номер в инвентаре. Зайди в 'Инвентарь' внизу, чтобы продать его или надеть рамку. За прохождение обучения ты получаешь 100 000 ₽!", [
+        { t:"Забрать награду", cls:"g", cb: () => { 
+    G.bal += 100000; 
+    G.nick_changed_once = true; 
+    save(); 
+    upBal(); 
+    toast("Награда 100к получена!"); 
+    
+    const spinBtn = $("#spin");
+    if (spinBtn) spinBtn.style.boxShadow = ""; 
+} }
+      ]);
+    }
+    spin(); 
+  };
+  $("#sell-all").onclick = sellAll;
+}
+
+(function initGame() {
+  let currentId = localStorage.getItem("nm_current_account") || "default";
+  const accounts = JSON.parse(localStorage.getItem("nm_accounts") || "{}");
+  if (!accounts[currentId]) { const old = localStorage.getItem("nm_save"); accounts[currentId] = old ? JSON.parse(old) : def(); localStorage.setItem("nm_accounts", JSON.stringify(accounts)); }
+  G = accounts[currentId];
+  
+  // ФИКС СТАРЫХ СЕЙВОВ (Баг с NaN и отсутствующими полями)
+  if (G.hunger === undefined || isNaN(G.hunger)) delete G.hunger;
+  if (!G.ownedBags) G.ownedBags = []; if (!G.themes) G.themes = []; if (G.usd === undefined) G.usd = 0;
+  if (!G.parkings) G.parkings = []; if (!G.st.common) G.st.common = 0; if (!G.st.uncommon) G.st.uncommon = 0;
+  // Защита от повторного обучения для старых игроков
+if (G.st.spins > 0 || G.bal !== S.START || G.level > 1) {
+  G.nick_changed_once = true;
+}
+  
+  if (G.settings.light_theme) document.body.classList.add("light");
+  if (G.settings.tablet_mode) document.body.classList.add("tablet-mode");
+  if (G.theme !== "default" && G.themes.includes(G.theme)) document.body.classList.add(G.theme);
+
+  function startGame(isDev) { 
+  G.isDev = isDev; save(); show("main"); refMain(); upBal(); bind(); 
+  if (G.settings.music) setTimeout(() => Music.start(), 500); 
+  if (G.nick_changed_once !== true) runTutorial(); // Строгая проверка
+}
+  document.getElementById("start-player").onclick = () => startGame(false);
+  document.getElementById("start-dev").onclick = () => { devLogin(); };
+  if (localStorage.getItem("nm_save")) startGame(G.isDev || false);
+})();
+
+function devLogin() {
+  showModal("Вход для разработчика", "", [
+    { t:"Войти", cls:"y", cb: () => {
+        const user = $("#dev-user").value.trim(), pass = $("#dev-pass").value.trim();
+        let role = "";
+        if (user === "Raze" && pass === "0702") role = "Главный разработчик";
+        else if (user === "Young" && pass === "2936") role = "Тестировщик";
+        else { alert("Неверный логин или пароль!"); return; }
+        G = def(); G.isDev = true; G.devRole = role; G.nick = user; save(); 
+        show("main"); refMain(); upBal(); bind(); if (G.settings.music) setTimeout(() => Music.start(), 500);
+      } 
+    }, { t:"Отмена", cls:"" }
+  ], `<input type="text" id="dev-user" placeholder="Логин"><input type="password" id="dev-pass" placeholder="Пароль">`);
+}
+
+// ОСТАНОВКА МУЗЫКИ ПРИ СВОРАЧИВАНИИ
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) { if (Music.playing) Music.stop(); }
+  else { if (G.settings.music && !Music.playing) { try { Music.start(); } catch(e) {} } }
+});
+
+setInterval(() => { if ($("#s-main").classList.contains("active")) { refMain(); } }, 1000);
+</script>
+</body>
+</html>
